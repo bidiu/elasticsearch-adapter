@@ -4,7 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Thread-safe.
+ * The adapter chain composed of several adapters and its meta data.
+ * <p/>
+ * This class is thread-safe.
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -27,12 +29,23 @@ public class AdapterChain {
 		adapterCtxList = new LinkedList<AdapterContext>();
 	}
 	
+	/**
+	 * Add a adapter to the rear of adapter chain
+	 * 
+	 * @param adapter
+	 * @return
+	 * 		the adapter chain itself
+	 * @author sunhe
+	 * @date Mar 18, 2016
+	 */
 	public synchronized AdapterChain addLast(Adapter adapter) {
 		AdapterContext adapterCtx = new AdapterContext();
 		
-		// link previous adapter context to current one
-		if (adapterCtxList.size() > 0) {
+		if (adapterCtxList.size() == 0) {
 			firstAdapter = adapter;
+		}
+		else if (adapterCtxList.size() > 0) {
+			// link current rear adapter context to current added one
 			AdapterContext lastAdapterCtx = adapterCtxList.get(adapterCtxList.size() - 1);
 			lastAdapterCtx.setNextAdapterCtx(adapterCtx);
 			lastAdapterCtx.setNextAdapter(adapter);
@@ -50,7 +63,9 @@ public class AdapterChain {
 	 * on this chain will be fired sequentially one by one.
 	 * 
 	 * @param data
+	 * 		data to be processed
 	 * @return
+	 * 		the resulting data
 	 * @author sunhe
 	 * @date 2016年3月18日
 	 */

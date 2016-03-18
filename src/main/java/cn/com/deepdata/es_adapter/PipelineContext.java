@@ -8,7 +8,9 @@ import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 
 /**
- * Immutable class
+ * This class is {@link Pipeline pipeline} context.
+ * <p/>
+ * And this class is a immutable one.
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -37,27 +39,25 @@ public class PipelineContext {
 		this.pipeline = pipeline;
 		dataQueuePoisonObj = new Object();
 	}
-
+	
+	/*
+	 * Getters ..
+	 */
 	public synchronized PipelineSettings getSettings() {
 		return settings;
 	}
-
 	public synchronized Client getClient() {
 		return client;
 	}
-
 	public synchronized BlockingQueue<Object> getDataQueue() {
 		return dataQueue;
 	}
-
 	public synchronized AdapterChain getAdapterChain() {
 		return adapterChain;
 	}
-
 	public synchronized Pipeline getPipeline() {
 		return pipeline;
 	}
-
 	public synchronized Object getDataQueuePoisonObj() {
 		return dataQueuePoisonObj;
 	}

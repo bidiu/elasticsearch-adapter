@@ -1,7 +1,9 @@
 package cn.com.deepdata.es_adapter.adapter;
 
 /**
- * Thread-safe
+ * Adapter context, mainly for invoking next {@link Adapter adapter} on the {@link AdapterChain adapter chain}.
+ * <p/>
+ * This class is thread-safe.
  * 
  * @author sunhe
  * @date 2016年3月18日

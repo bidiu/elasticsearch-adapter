@@ -9,7 +9,7 @@ import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 
 /**
- * Inbound and outbound tasks' abstract class.
+ * The abstract class of {@link InboundTask} and {@link OutboundTask}.
  * 
  * @author sunhe
  * @date 2016年3月18日

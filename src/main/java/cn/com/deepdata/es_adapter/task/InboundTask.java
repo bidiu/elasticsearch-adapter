@@ -7,7 +7,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import cn.com.deepdata.es_adapter.PipelineContext;
 
 /**
- * Runnable task in inbound mode
+ * Runnable task for inbound mode.
  * 
  * @author sunhe
  * @date 2016年3月18日

@@ -8,20 +8,31 @@ import org.elasticsearch.node.NodeBuilder;
 
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
+import cn.com.deepdata.es_adapter.common.Closeable;
 
 /**
- * TODO support delete ..
- * TODO log
+ * {@link Pipeline} is an abstract of channel that connect a data source to an 
+ * Elasticsearch instance, so that data can be transmitted into or out of the 
+ * instance. Client can use this class to aggregate different components of the 
+ * library.
+ * <p/>
+ * Note that this class MUST be closed by invoking the method {@link #close()} 
+ * when not used any more.
+ * <p/>
+ * 
+ * TODO support delete .. <br/>
+ * TODO log <br/>
+ * TODO break point <br/>
  * 
  * @author sunhe
  * @date 2016年3月18日
  */
-public class Pipeline {
+public class Pipeline implements Closeable {
 	
 	/**
-	 * Pipeline settings class
+	 * This class is {@link Pipeline} settings.
 	 * <p/>
-	 * This class is thread-safe.
+	 * And this class is thread-safe.
 	 * 
 	 * @author sunhe
 	 * @date 2016年3月18日
@@ -33,65 +44,95 @@ public class Pipeline {
 		public static final int DEFAULT_THREAD_POOL_SIZE = 4;
 		public static final boolean DEFAULT_IS_BULK = false;
 		
-		/** inbound means put data into elasticsearch */
+		/**
+		 * Inbound mode means that data are transmitted into Elasticsearch, while
+		 * outbound mode means that data are transmitted out of Elasticsearch.
+		 * <p/>
+		 * Inbound mode by default.
+		 */
 		private boolean isInbound;
 		
-		/** Elasticsearch node to be used to generate a client */
+		/**
+		 * Elasticsearch node to be used to generate a client.
+		 */
 		private Node node;
 		
+		/**
+		 * All data will be staged into a queue for a while, this attribute is 
+		 * the queue's size - the number of data unit, typically document.
+		 * <p/>
+		 * 4096 by default.
+		 */
 		private int dataQueueCapacity;
 		
 		private AdapterChainInitializer adapterChainInitializer;
 		
+		/**
+		 * 4 by default.
+		 */
 		private int threadPoolSize;
 		
 		private String index;
 		
 		private String type;
 		
+		/**
+		 * Whether the operation with Elasticsearch is in bulk mode, 
+		 * false by default. 
+		 */
 		private boolean isBulk;
 		
 		private PipelineSettings() {
 			// dummy..
 		}
 		
+		/*
+		 * Getters ..
+		 */
 		public synchronized boolean isInbound() {
 			return isInbound;
 		}
-
 		public synchronized Node getNode() {
 			return node;
 		}
-
 		public synchronized int getDataQueueCapacity() {
 			return dataQueueCapacity;
 		}
-		
 		public synchronized int getThreadPoolSize() {
 			return threadPoolSize;
 		}
-		
 		public synchronized String getIndex() {
 			return index;
 		}
-		
 		public synchronized String getType() {
 			return type;
 		}
-		
 		public synchronized boolean isBulk() {
 			return isBulk;
 		}
-		
 		public synchronized AdapterChainInitializer getAdapterChainInitializer() {
 			return adapterChainInitializer;
 		}
-
+		
+		/**
+		 * Set inbound mode.
+		 * 
+		 * @return
+		 * @author sunhe
+		 * @date Mar 18, 2016
+		 */
 		public synchronized PipelineSettings inbound() {
 			isInbound = true;
 			return this;
 		}
 		
+		/**
+		 * Set outbound mode.
+		 * 
+		 * @return
+		 * @author sunhe
+		 * @date Mar 18, 2016
+		 */
 		public synchronized PipelineSettings outbound() {
 			isInbound = false;
 			return this;
@@ -132,6 +173,13 @@ public class Pipeline {
 			return this;
 		}
 		
+		/**
+		 * Validate whether the settings itself is okay.
+		 * 
+		 * @return
+		 * @author sunhe
+		 * @date Mar 18, 2016
+		 */
 		public boolean validate() {
 			if (index == null || type == null) {
 				return false;
@@ -144,9 +192,11 @@ public class Pipeline {
 		/**
 		 * Get pipeline's default settings.
 		 * 
+		 * @param clusterName
+		 * 		Elasticsearch cluster name
 		 * @return
 		 * @author sunhe
-		 * @date 2016年3月18日
+		 * @date Mar 18, 2016
 		 */
 		public static PipelineSettings getDefaultSettings(String clusterName) {
 			PipelineSettings settings =  new PipelineSettings();
@@ -165,7 +215,7 @@ public class Pipeline {
 		}
 		
 		/**
-		 * Get pipeline's default settings with cluster name 'elasticsearch'.
+		 * Get pipeline's default settings with cluster name "elasticsearch".
 		 * 
 		 * @return
 		 * @author sunhe
@@ -179,11 +229,11 @@ public class Pipeline {
 	
 	private PipelineContext pipelineCtx;
 	
-	private PipelineContext getPipelineCtx() {
+	private synchronized PipelineContext getPipelineCtx() {
 		return pipelineCtx;
 	}
 	
-	private void setPipelineCtx(PipelineContext pipelineCtx) {
+	private synchronized void setPipelineCtx(PipelineContext pipelineCtx) {
 		this.pipelineCtx = pipelineCtx;
 	}
 	
@@ -192,9 +242,11 @@ public class Pipeline {
 	}
 
 	/**
-	 * Note that after invoking this methods, the parameter settings
-	 * should be discarded, which means the settings MUST NOT be altered.
-	 * 
+	 * Build a pipeline with a given settings.
+	 * <p/>
+	 * Note that after invoking this methods, the parameter "settings"
+	 * MUST be discarded from outside, which means the settings MUST 
+	 * NOT be altered any more, otherwise the outcome is undefined.
 	 * 
 	 * @param settings
 	 * @return
@@ -207,7 +259,7 @@ public class Pipeline {
 		}
 		Pipeline pipeline = new Pipeline();
 		
-		// set pipeline's component..
+		// set pipeline's component ..
 		AdapterChain adapterChain = new AdapterChain(settings.isInbound());
 		if (settings.getAdapterChainInitializer() != null) {
 			settings.getAdapterChainInitializer().initialize(adapterChain);
@@ -216,7 +268,7 @@ public class Pipeline {
 				new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity()), adapterChain, 
 				pipeline);
 		pipeline.setPipelineCtx(pipelineCtx);
-		// TODO Runnable related
+		// TODO Runnable related ..
 		
 		return pipeline;
 	}
@@ -234,7 +286,7 @@ public class Pipeline {
 			pipelineCtx.getDataQueue().put(data);
 		}
 		else {
-			throw new IllegalStateException("Not allowed to put data into queue when in inbound mode.");
+			throw new IllegalStateException("Not allowed to take data from queue when in inbound mode.");
 		}
 	}
 	
@@ -248,11 +300,16 @@ public class Pipeline {
 	 */
 	public Object takeData() throws InterruptedException {
 		if (pipelineCtx.getSettings().isInbound) {
-			throw new IllegalStateException("Not allowed to take data from queue when in outbound mode.");
+			throw new IllegalStateException("Not allowed to put data to queue when in outbound mode.");
 		}
 		else {
 			return pipelineCtx.getDataQueue().take();
 		}
+	}
+	
+	@Override
+	public void close() {
+		// TODO
 	}
 	
 }

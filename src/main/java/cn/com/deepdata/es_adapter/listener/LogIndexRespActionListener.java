@@ -9,7 +9,7 @@ import org.elasticsearch.action.index.IndexResponse;
  * @author sunhe
  * @date 2016年3月18日
  */
-public class LogActionListener implements ActionListener<IndexResponse> {
+public class LogIndexRespActionListener implements ActionListener<IndexResponse> {
 
 	@Override
 	public void onResponse(IndexResponse response) {
