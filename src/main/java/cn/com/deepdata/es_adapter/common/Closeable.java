@@ -1,7 +1,7 @@
 package cn.com.deepdata.es_adapter.common;
 
 /**
- * Classes that can be closed to release any underlying resources.
+ * Classes that can be closed to release underlying resources.
  * <p/>
  * 
  * @author sunhe
@@ -10,7 +10,7 @@ package cn.com.deepdata.es_adapter.common;
 public interface Closeable {
 	
 	/**
-	 * Repetitive invocation of this method has no 
+	 * Repetitive invocation of this method should has no 
 	 * side effect.
 	 * 
 	 * @author sunhe

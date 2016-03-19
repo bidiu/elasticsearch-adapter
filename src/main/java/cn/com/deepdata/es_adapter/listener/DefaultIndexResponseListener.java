@@ -1,15 +1,18 @@
 package cn.com.deepdata.es_adapter.listener;
 
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexResponse;
 
 /**
- * Log Elasticsearch index response to somewhere.
+ * Default index response listener that will log the response somewhere.
+ * <p/>
+ * This class is thread-safe.
+ * <p/>
+ * TODO somewhere should be the current directory
  * 
  * @author sunhe
  * @date 2016年3月18日
  */
-public class LogIndexRespActionListener implements ActionListener<IndexResponse> {
+public class DefaultIndexResponseListener implements ResponseListener<IndexResponse> {
 
 	@Override
 	public void onResponse(IndexResponse response) {

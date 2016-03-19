@@ -8,16 +8,19 @@ import cn.com.deepdata.es_adapter.PipelineContext;
 
 /**
  * Runnable task for inbound mode.
+ * <p/>
+ * TODO will thread pool ensure the number of threads ? task won't <br/>
+ * TODO stop on error
  * 
  * @author sunhe
  * @date 2016年3月18日
  */
 public class InboundTask extends BoundTask {
-
+	
 	public InboundTask(PipelineContext pipelineCtx) {
 		super(pipelineCtx);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
@@ -30,22 +33,22 @@ public class InboundTask extends BoundTask {
 				if (data instanceof Map<?, ?>) {
 					Map<String, Object> source = (Map<String, Object>) data;
 					// TODO
-					client.prepareIndex(index, type).setSource(source).execute();
+					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
 				}
 				else if (data instanceof String) {
 					String source = (String) data;
 					// TODO
-					client.prepareIndex(index, type).setSource(source);
+					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
 				}
 				else if (data instanceof XContentBuilder) {
 					XContentBuilder source = (XContentBuilder) data;
 					// TODO
-					client.prepareIndex(index, type).setSource(source);
+					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
 				}
 				else if (data instanceof byte[]) {
 					byte[] source = (byte[]) data;
 					// TODO
-					client.prepareIndex(index, type).setSource(source);
+					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
 				}
 				else {
 					// TODO
