@@ -53,7 +53,7 @@ public class Pipeline implements Closeable {
 		
 		public static final boolean DEFAULT_IS_INBOUND = true;
 		public static final int DEFAULT_DATA_QUEUE_CAPACITY = 4096;
-		public static final int DEFAULT_THREAD_POOL_SIZE = 4;
+		public static final int DEFAULT_THREAD_POOL_SIZE = 8;
 		public static final boolean DEFAULT_IS_BULK = false;
 		public static final boolean DEFAULT_DOES_STOP_ON_ERROR = false;
 		
