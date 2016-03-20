@@ -5,8 +5,7 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-
+import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
@@ -24,12 +23,23 @@ public class PipelineTest {
 	@Ignore
 	@Test
 	public void test() throws InterruptedException {
+		int total = 100000;
 		PipelineSettings settings = PipelineSettings.getDefaultSettings()
-				.index("library")
-				.type("book");
+				.index("library6")
+				.type("book")
+				.threadPoolSize(8);
 		Pipeline pipeline = Pipeline.build(settings);
-		pipeline.putData(getDoc());
+		
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < total; i++) {
+			pipeline.putData(getDoc());
+			System.out.println(String.format("%.2f%%", ((double) i) / total * 100));
+		}
 		pipeline.close();
+		long end = System.currentTimeMillis();
+		
+		System.out.println("********************************");
+		System.out.println((end - start) / 1000 + "s");
 	}
 
 }
