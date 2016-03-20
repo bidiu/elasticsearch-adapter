@@ -81,7 +81,7 @@ public class Pipeline implements Closeable {
 		private AdapterChainInitializer adapterChainInitializer;
 		
 		/**
-		 * 4 by default.
+		 * 8 by default.
 		 */
 		private int threadPoolSize;
 		
