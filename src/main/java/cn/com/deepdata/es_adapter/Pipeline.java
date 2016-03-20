@@ -29,9 +29,9 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO support delete .. <br/>
  * TODO log <br/>
  * TODO break point <br/>
+ * TODO more advanced listener
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -40,6 +40,9 @@ public class Pipeline implements Closeable {
 	
 	/**
 	 * This class is {@link Pipeline} settings.
+	 * <p/>
+	 * Note that different {@link Pipeline} MUST NOT share the same 
+	 * {@link PipelineSettings} instance.
 	 * <p/>
 	 * And this class is thread-safe.
 	 * 
@@ -52,6 +55,7 @@ public class Pipeline implements Closeable {
 		public static final int DEFAULT_DATA_QUEUE_CAPACITY = 4096;
 		public static final int DEFAULT_THREAD_POOL_SIZE = 4;
 		public static final boolean DEFAULT_IS_BULK = false;
+		public static final boolean DEFAULT_DOES_STOP_ON_ERROR = false;
 		
 		/**
 		 * Inbound mode means that data are transmitted into Elasticsearch, while
@@ -91,6 +95,8 @@ public class Pipeline implements Closeable {
 		 */
 		private boolean isBulk;
 		
+		private boolean doesStopOnError;
+		
 		private ResponseListener<IndexResponse> indexResponseListener;
 		
 		private PipelineSettings() {
@@ -98,7 +104,7 @@ public class Pipeline implements Closeable {
 		}
 		
 		/*
-		 * Getters ..
+		 * getters ..
 		 */
 		public synchronized boolean isInbound() {
 			return isInbound;
@@ -127,66 +133,63 @@ public class Pipeline implements Closeable {
 		public synchronized ResponseListener<IndexResponse> getIndexResponseListener() {
 			return indexResponseListener;
 		}
+		public synchronized boolean doesStopOnError() {
+			return doesStopOnError;
+		}
 		
-		/**
-		 * Set inbound mode.
-		 * 
-		 * @return
-		 * @author sunhe
-		 * @date Mar 18, 2016
+		/*
+		 * setters ..
 		 */
 		public synchronized PipelineSettings inbound() {
 			isInbound = true;
 			return this;
 		}
-		
-		/**
-		 * Set outbound mode.
-		 * 
-		 * @return
-		 * @author sunhe
-		 * @date Mar 18, 2016
-		 */
 		public synchronized PipelineSettings outbound() {
 			isInbound = false;
 			return this;
 		}
-		
 		public synchronized PipelineSettings node(Node node) {
 			this.node = node;
 			return this;
 		}
-		
 		public synchronized PipelineSettings dataQueueCapacity(int dataQueueCapacity) {
 			this.dataQueueCapacity = dataQueueCapacity;
 			return this;
 		}
-		
 		public synchronized PipelineSettings adapterChainInitializer(AdapterChainInitializer adapterChainInitializer) {
 			this.adapterChainInitializer = adapterChainInitializer;
 			return this;
 		}
-		
 		public synchronized PipelineSettings threadPoolSize(int threadPoolSize) {
 			this.threadPoolSize = threadPoolSize;
 			return this;
 		}
-		
 		public synchronized PipelineSettings index(String index) {
 			this.index = index;
 			return this;
 		}
-		
 		public synchronized PipelineSettings type(String type) {
 			this.type = type;
 			return this;
 		}
-		
+		public synchronized PipelineSettings stopOnError(boolean doesStopOnError) {
+			this.doesStopOnError = doesStopOnError;
+			return this;
+		}
+		/**
+		 * Note that bulk mode currently is not supported.
+		 * <p/>
+		 * TODO
+		 * 
+		 * @param isBulk
+		 * @return
+		 * @author sunhe
+		 * @date Mar 20, 2016
+		 */
 		public synchronized PipelineSettings bulk(boolean isBulk) {
 			this.isBulk = isBulk;
 			return this;
 		}
-		
 		public synchronized PipelineSettings indexResponseListener(ResponseListener<IndexResponse> indexResponseListener) {
 			this.indexResponseListener = indexResponseListener;
 			return this;
@@ -236,7 +239,8 @@ public class Pipeline implements Closeable {
 					.dataQueueCapacity(DEFAULT_DATA_QUEUE_CAPACITY)
 					.threadPoolSize(DEFAULT_THREAD_POOL_SIZE)
 					.bulk(DEFAULT_IS_BULK)
-					.indexResponseListener(new DefaultIndexResponseListener());
+					.indexResponseListener(new DefaultIndexResponseListener())
+					.stopOnError(DEFAULT_DOES_STOP_ON_ERROR);
 		}
 		
 		/**
@@ -385,8 +389,8 @@ public class Pipeline implements Closeable {
 	/**
 	 * Close the pipeline. After the pipeline is closed, attempts that put data into 
 	 * or retrieve from queue will cause exception. More specifically, you should not 
-	 * invoke the methods {@link cn.com.deepdata.es_adapter.Pipeline#putData(Object) putData(Object)} and 
-	 * {@link cn.com.deepdata.es_adapter.Pipeline#takeData() takeData()} after the pipeline
+	 * invoke the methods {@link cn.com.deepdata.es_adapter.Pipeline#putData(Object) putData(Object)} 
+	 * and {@link cn.com.deepdata.es_adapter.Pipeline#takeData() takeData()} after the pipeline
 	 * is closed, otherwise exception will occur.
 	 * <p/>
 	 * Also see {@link cn.com.deepdata.es_adapter.common.Closeable#close()}.
@@ -402,6 +406,7 @@ public class Pipeline implements Closeable {
 		}
 		
 		isClosed = true;
+		boolean isInterrupted = false;
 		while (! executorService.isTerminated()) {
 			try {
 				pipelineCtx.getDataQueue().put(pipelineCtx.getDataQueuePoisonObj());
@@ -409,10 +414,15 @@ public class Pipeline implements Closeable {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException e) {
-				// do nothing, since the close operation cannot be interrupted
+				isInterrupted = true;
+				// retry to close, since the close operation cannot be interrupted
 			}
 		}
 		pipelineCtx.getClient().close();
+		if (isInterrupted) {
+			// tell the caller current thread was interrupted during close operation
+			Thread.currentThread().interrupt();
+		}
 	}
 	
 }

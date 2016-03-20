@@ -2,15 +2,16 @@ package cn.com.deepdata.es_adapter.task;
 
 import java.util.Map;
 
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import cn.com.deepdata.es_adapter.PipelineContext;
+import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
 
 /**
  * Runnable task for inbound mode.
- * <p/>
- * TODO will thread pool ensure the number of threads ? task won't <br/>
- * TODO stop on error
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -26,44 +27,65 @@ public class InboundTask extends BoundTask {
 	public void run() {
 		try {
 			Object data = null;
+			IndexRequestBuilder indexRequestBuilder = null;
+			IndexResponse indexResponse = null;
 			
 			while ((data = dataQueue.take()) != dataQueuePoisonObj) {
-				// adapt the incoming data to JSON format
-				data = adapterChain.fireFirstAdapter(data);
-				if (data instanceof Map<?, ?>) {
-					Map<String, Object> source = (Map<String, Object>) data;
-					// TODO
-					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
+				try {
+					// adapt data to JSON format
+					data = adapterChain.fireFirstAdapter(data);
+					
+					// build index request
+					if (data instanceof Map<?, ?>) {
+						Map<String, Object> source = (Map<String, Object>) data;
+						indexRequestBuilder = client.prepareIndex(index, type).setSource(source);
+					}
+					else if (data instanceof String) {
+						String source = (String) data;
+						indexRequestBuilder = client.prepareIndex(index, type).setSource(source);
+					}
+					else if (data instanceof XContentBuilder) {
+						XContentBuilder source = (XContentBuilder) data;
+						indexRequestBuilder = client.prepareIndex(index, type).setSource(source);
+					}
+					else if (data instanceof byte[]) {
+						byte[] source = (byte[]) data;
+						indexRequestBuilder = client.prepareIndex(index, type).setSource(source);
+					}
+					else {
+						// unsupported JSON format
+						throw new UnsupportedJsonFormatException("Unsupported JSON format; it should be one of these: String, Map<String, Object>, XContentBuilder, and byte[].");
+					}
+					
+					// fire index request
+					indexResponse = indexRequestBuilder.execute().actionGet();
+					settings.getIndexResponseListener().onResponse(indexResponse);
 				}
-				else if (data instanceof String) {
-					String source = (String) data;
-					// TODO
-					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
+				catch (UnsupportedJsonFormatException e) {
+					e.printStackTrace();
+					settings.getIndexResponseListener().onFailure(e);
+					if (settings.doesStopOnError()) {
+						break;
+					}
 				}
-				else if (data instanceof XContentBuilder) {
-					XContentBuilder source = (XContentBuilder) data;
-					// TODO
-					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
-				}
-				else if (data instanceof byte[]) {
-					byte[] source = (byte[]) data;
-					// TODO
-					client.prepareIndex(index, type).setSource(source).execute(settings.getIndexResponseListener());
-				}
-				else {
-					// TODO
+				catch (ElasticsearchException e) {
+					// TODO listener
+					e.printStackTrace();
+					if (settings.doesStopOnError()) {
+						break;
+					}
 				}
 			}
-			// tell other threads to exit
-			dataQueue.add(dataQueuePoisonObj);
-		}
-		catch (RuntimeException e) {
-			// TODO
-			e.printStackTrace();
 		}
 		catch (InterruptedException e) {
-			// TODO
 			e.printStackTrace();
+		}
+		catch (RuntimeException e) {
+			e.printStackTrace();
+		}
+		finally {
+			// tell other threads to exit
+			dataQueue.add(dataQueuePoisonObj);
 		}
 	}
 	
