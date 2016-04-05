@@ -15,10 +15,10 @@ public class CsvFileProcessorTest {
 	
 	@Test
 	public void test() throws FileNotFoundException, InterruptedException {
-		File file = new File("C:\\Users\\deepdata\\Desktop\\test\\library21.csv");
-		PipelineSettings settings = PipelineSettings.getDefaultSettings();
-		CsvFileProcessor processor = new CsvFileProcessor(file, "UTF-8", true, settings);
-		processor.process();
+//		File file = new File("C:\\Users\\deepdata\\Desktop\\test\\library21.csv");
+//		PipelineSettings settings = PipelineSettings.getDefaultSettings();
+//		CsvFileProcessor processor = new CsvFileProcessor(file, "UTF-8", true, settings);
+//		processor.process();
 	}
 	
 }

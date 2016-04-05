@@ -31,7 +31,9 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * 
  * TODO log <br/>
  * TODO break point <br/>
- * TODO more advanced listener
+ * TODO more advanced listener <br/>
+ * TODO refine Javadoc
+ * TODO support PipelineSettings deep copy
  * 
  * @author sunhe
  * @date 2016年3月18日

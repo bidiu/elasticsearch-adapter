@@ -19,7 +19,7 @@ import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
  * <p/>
  * This class is thread-safe.
  * <p/>
- * TODO refine Javadoc 
+ * TODO it's inefficient to have one pipeline per CsvFileProcessor
  * 
  * @author sunhe
  * @date Mar 20, 2016
@@ -46,47 +46,7 @@ public class CsvFileProcessor {
 	 * exception will occur..
 	 */
 	private boolean shareSingleMapper;
-	
-	/**
-	 * Note that setting's index and type make no effect.
-	 * 
-	 * @param file
-	 * @param charset
-	 * @param hasTitle
-	 * @param settings
-	 * @author sunhe
-	 * @date Mar 21, 2016
-	 */
-	public CsvFileProcessor(File file, String charset, boolean hasTitle, PipelineSettings settings) {
-		this(file, charset, hasTitle, settings, false);
-	}
-	
-	/**
-	 * 
-	 * @param file
-	 * @param charset
-	 * @param hasTitle
-	 * @param settings
-	 * @author sunhe
-	 * @date 2016年4月5日
-	 */
-	public CsvFileProcessor(File file, String charset, boolean hasTitle, PipelineSettings settings, boolean shareSingleMapper) {
-		this(file, charset, DEFAULT_DELIMITER, hasTitle, settings, shareSingleMapper);
-	}
-	
-	/**
-	 * 
-	 * @param file
-	 * @param charset
-	 * @param delimiter
-	 * @param hasTitleLine
-	 * @param settings
-	 * @author sunhe
-	 * @date 2016年4月5日
-	 */
-	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, PipelineSettings settings) {
-		this(file, charset, delimiter, hasTitleLine, settings, false);
-	}
+	private boolean extractIndexTypeName;
 	
 	/**
 	 * Note that setting's index and type make no effect.
@@ -99,7 +59,8 @@ public class CsvFileProcessor {
 	 * @author sunhe
 	 * @date Mar 21, 2016
 	 */
-	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, PipelineSettings settings, boolean shareSingleMapper) {
+	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, 
+			PipelineSettings settings, boolean shareSingleMapper, boolean extractIndexTypeName) {
 		this.settings = settings;
 		keyList = new ArrayList<String>();
 		this.file = file;
@@ -107,6 +68,7 @@ public class CsvFileProcessor {
 		this.delimiter = Pattern.compile("\\s*" + delimiter + "\\s*");
 		this.hasTitleLine = hasTitleLine;
 		this.shareSingleMapper = shareSingleMapper;
+		this.extractIndexTypeName = extractIndexTypeName;
 	}
 	
 	private boolean isDone() {
@@ -136,6 +98,10 @@ public class CsvFileProcessor {
 	 * @date Mar 21, 2016
 	 */
 	private void extractIndexType(String filename) {
+		if (! extractIndexTypeName) {
+			return;
+		}
+		
 		filename = FilenameUtil.excludeExtensionName(filename);
 		String index = filename.substring(0, filename.indexOf("-"));
 		String type = filename.substring(filename.indexOf("-") + 1);

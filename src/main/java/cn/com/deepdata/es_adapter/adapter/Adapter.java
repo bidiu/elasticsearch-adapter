@@ -17,6 +17,8 @@ public interface Adapter {
 	/**
 	 * Note that parameter "ctx" MUST NOT be altered in this method, 
 	 * or the outcome is undefined.
+	 * <p/>
+	 * TODO except the msg
 	 * 
 	 * @param ctx
 	 * @param data
@@ -31,6 +33,9 @@ public interface Adapter {
 	/**
 	 * Note that parameter "ctx" MUST NOT be altered in this method, 
 	 * or the outcome is undefined.
+	 * <p/>
+	 * TODO except the msg
+	 * 
 	 * 
 	 * @param ctx
 	 * @param data
