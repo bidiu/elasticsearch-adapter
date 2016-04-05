@@ -13,6 +13,8 @@ import org.elasticsearch.action.ActionListener;
  * listener will be used, for instance, {@link DefaultIndexResponseListener}.
  * <p/>
  * Note that implementation of this interface MUST be thread-safe.
+ * <p/>
+ * TODO Isolate listener exception.
  * 
  * @author sunhe
  * @date Mar 19, 2016

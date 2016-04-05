@@ -16,6 +16,10 @@ import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 /**
  * The file to be processed should end with ".csv" 
  * extension name.
+ * <p/>
+ * This class is thread-safe.
+ * <p/>
+ * TODO refine Javadoc 
  * 
  * @author sunhe
  * @date Mar 20, 2016
@@ -33,6 +37,15 @@ public class CsvFileProcessor {
 	private String charset;
 	private Pattern delimiter;
 	private boolean hasTitleLine;
+	/**
+	 * If this attribute is true, then all of the CSV files 
+	 * within same folder should share a single mapper file, whose 
+	 * filename doesn't matter (as long as it has '.mapper' extension). 
+	 * However, you have to make sure that 
+	 * there is one and only one mapper file in the folder, otherwise 
+	 * exception will occur..
+	 */
+	private boolean shareSingleMapper;
 	
 	/**
 	 * Note that setting's index and type make no effect.
@@ -45,7 +58,34 @@ public class CsvFileProcessor {
 	 * @date Mar 21, 2016
 	 */
 	public CsvFileProcessor(File file, String charset, boolean hasTitle, PipelineSettings settings) {
-		this(file, charset, DEFAULT_DELIMITER, hasTitle, settings);
+		this(file, charset, hasTitle, settings, false);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param charset
+	 * @param hasTitle
+	 * @param settings
+	 * @author sunhe
+	 * @date 2016年4月5日
+	 */
+	public CsvFileProcessor(File file, String charset, boolean hasTitle, PipelineSettings settings, boolean shareSingleMapper) {
+		this(file, charset, DEFAULT_DELIMITER, hasTitle, settings, shareSingleMapper);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param charset
+	 * @param delimiter
+	 * @param hasTitleLine
+	 * @param settings
+	 * @author sunhe
+	 * @date 2016年4月5日
+	 */
+	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, PipelineSettings settings) {
+		this(file, charset, delimiter, hasTitleLine, settings, false);
 	}
 	
 	/**
@@ -59,13 +99,14 @@ public class CsvFileProcessor {
 	 * @author sunhe
 	 * @date Mar 21, 2016
 	 */
-	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, PipelineSettings settings) {
+	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, PipelineSettings settings, boolean shareSingleMapper) {
 		this.settings = settings;
 		keyList = new ArrayList<String>();
 		this.file = file;
 		this.charset = charset;
 		this.delimiter = Pattern.compile("\\s*" + delimiter + "\\s*");
 		this.hasTitleLine = hasTitleLine;
+		this.shareSingleMapper = shareSingleMapper;
 	}
 	
 	private boolean isDone() {
@@ -103,8 +144,10 @@ public class CsvFileProcessor {
 	
 	private void extractKeyList() throws FileNotFoundException {
 		// TODO refine pattern
-		File[] files = FilenameUtil.getBrotherFiles(
-				file, Pattern.compile("^\\w+-\\w+\\." + MAPPER_FILE_EXTENSION_NAME + "$"));
+		File[] files = FilenameUtil.getBrotherFiles(file, 
+				shareSingleMapper ? 
+				Pattern.compile("^.+\\." + MAPPER_FILE_EXTENSION_NAME + "$") :
+				Pattern.compile("^\\w+-\\w+\\." + MAPPER_FILE_EXTENSION_NAME + "$"));
 		if (files.length == 0) {
 			throw new FileNotFoundException("Cannot find the mapper file corresponding to " + file);
 		}
@@ -142,15 +185,13 @@ public class CsvFileProcessor {
 	}
 	
 	/**
-	 * Note that this method is not idempotent. The outcome 
-	 * of repetitive call of this method is undefined. 
 	 * 
 	 * @throws FileNotFoundException
 	 * @throws InterruptedException
 	 * @author sunhe
 	 * @date Mar 20, 2016
 	 */
-	public void process() throws FileNotFoundException, InterruptedException {
+	public synchronized void process() throws FileNotFoundException, InterruptedException {
 		if (isDone()) {
 			return;
 		}
