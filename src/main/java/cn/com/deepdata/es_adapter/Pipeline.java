@@ -1,5 +1,7 @@
 package cn.com.deepdata.es_adapter;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -48,22 +50,138 @@ public class Pipeline implements Closeable {
 	/**
 	 * This class is {@link Pipeline} settings.
 	 * <p/>
-	 * Note that different {@link Pipeline} MUST NOT share the same 
-	 * {@link PipelineSettings} instance.
-	 * <p/>
-	 * And this class is thread-safe.
+	 * The instance of this class is immutable and can be used repeatedly.
 	 * 
 	 * @author sunhe
 	 * @date 2016年3月18日
 	 */
 	public static class PipelineSettings {
 		
-		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
+		// name
+		public static final String IS_INBOUND = "isInbound";
+		public static final String DATA_QUEUE_CAPACITY = "dataQueueCapacity";
+		public static final String THREAD_POOL_SIZE = "threadPoolSize";
+		public static final String CLUSTER_NAME = "clusterName";
+		public static final String HOST = "host";
+		public static final String PORT = "port";
+		public static final String INDEX = "index";
+		public static final String TYPE = "type";
+		public static final String IS_BULK = "isBulk";
+		public static final String DOES_STOP_ON_ERROR = "doesStopOnError";
+		
+		// default value
 		public static final boolean DEFAULT_IS_INBOUND = true;
 		public static final int DEFAULT_DATA_QUEUE_CAPACITY = 4096;
 		public static final int DEFAULT_THREAD_POOL_SIZE = 8;
+		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
 		public static final boolean DEFAULT_IS_BULK = false;
 		public static final boolean DEFAULT_DOES_STOP_ON_ERROR = false;
+		
+		/**
+		 * Builder that can build {@link PipelineSettings}.
+		 * 
+		 * @author sunhe
+		 * @date 2016年4月15日
+		 */
+		public static class SettingsBuilder {
+			
+			private Map<String, String> map;
+			
+			private SettingsBuilder() {
+				map = new ConcurrentHashMap<String, String>();
+	
+				// here set the default value
+				map.put(IS_INBOUND, String.valueOf(DEFAULT_IS_INBOUND));
+				map.put(DATA_QUEUE_CAPACITY, String.valueOf(DEFAULT_DATA_QUEUE_CAPACITY));
+				map.put(THREAD_POOL_SIZE, String.valueOf(DEFAULT_THREAD_POOL_SIZE));
+				map.put(CLUSTER_NAME, DEFAULT_CLUSTER_NAME);
+				map.put(IS_BULK, String.valueOf(DEFAULT_IS_BULK));
+				map.put(DOES_STOP_ON_ERROR, String.valueOf(DEFAULT_DOES_STOP_ON_ERROR));
+			}
+			
+			/*
+			 * setters ..
+			 */
+			public SettingsBuilder inbound() {
+				map.put(IS_INBOUND, String.valueOf(true));
+				return this;
+			}
+			public SettingsBuilder outbound() {
+				map.put(IS_INBOUND, String.valueOf(false));
+				return this;
+			}
+			public SettingsBuilder dataQueueCapacity(int dataQueueCapacity) {
+				map.put(DATA_QUEUE_CAPACITY, String.valueOf(dataQueueCapacity));
+				return this;
+			}
+			public SettingsBuilder threadPoolSize(int threadPoolSize) {
+				map.put(THREAD_POOL_SIZE, String.valueOf(threadPoolSize));
+				return this;
+			}
+			public SettingsBuilder clusterName(String clusterName) {
+				map.put(CLUSTER_NAME, clusterName);
+				return this;
+			}
+			public SettingsBuilder host(String host) {
+				map.put(HOST, host);
+				return this;
+			}
+			public SettingsBuilder port(int port) {
+				map.put(PORT, String.valueOf(port));
+				return this;
+			}
+			public SettingsBuilder index(String index) {
+				map.put(INDEX, index);
+				return this;
+			}
+			public SettingsBuilder type(String type) {
+				map.put(TYPE, type);
+				return this;
+			}
+			public SettingsBuilder stopOnError(boolean doesStopOnError) {
+				map.put(DOES_STOP_ON_ERROR, String.valueOf(doesStopOnError));
+				return this;
+			}
+			/**
+			 * Note that bulk mode currently is not supported.
+			 * <p/>
+			 * TODO
+			 * 
+			 * @param isBulk
+			 * @return
+			 * @author sunhe
+			 * @date Mar 20, 2016
+			 */
+			public SettingsBuilder bulk(boolean isBulk) {
+				map.put(IS_BULK, String.valueOf(isBulk));
+				return this;
+			}
+			
+			/**
+			 * Build a {@link PipelineSettings}.
+			 * 
+			 * @return
+			 * @author sunhe
+			 * @date 2016年4月15日
+			 */
+			public PipelineSettings build() {
+				PipelineSettings settings =  new PipelineSettings();
+				
+				// set all of the settings
+				settings.setInbound(Boolean.valueOf(map.get(IS_INBOUND)));
+				settings.dataQueueCapacity(Integer.parseInt(map.get(DATA_QUEUE_CAPACITY)));
+				settings.threadPoolSize(Integer.parseInt(map.get(THREAD_POOL_SIZE)));
+				// TODO cluster name
+				settings.host(map.get(HOST));
+				settings.port(Integer.parseInt(map.get(PORT)));
+				settings.index(map.get(INDEX));
+				settings.type(map.get(TYPE));
+				settings.bulk(Boolean.valueOf(map.get(IS_BULK)));
+				settings.stopOnError(Boolean.valueOf(map.get(DOES_STOP_ON_ERROR)));
+				return settings;
+			}
+			
+		}
 		
 		/**
 		 * Inbound mode means that data are transmitted into Elasticsearch, while
@@ -126,92 +244,83 @@ public class Pipeline implements Closeable {
 		/*
 		 * getters ..
 		 */
-		public synchronized boolean isInbound() {
+		public boolean isInbound() {
 			return isInbound;
 		}
-		public synchronized Node getNode() {
+		public Node getNode() {
 			return node;
 		}
-		public synchronized int getDataQueueCapacity() {
+		public int getDataQueueCapacity() {
 			return dataQueueCapacity;
 		}
-		public synchronized int getThreadPoolSize() {
+		public int getThreadPoolSize() {
 			return threadPoolSize;
 		}
-		public synchronized String getClusterName() {
+		public String getClusterName() {
 			return clusterName;
 		}
-		public synchronized String getHost() {
+		public String getHost() {
 			return host;
 		}
-		public synchronized int getPort() {
+		public int getPort() {
 			return port;
 		}
-		public synchronized String getIndex() {
+		public String getIndex() {
 			return index;
 		}
-		public synchronized String getType() {
+		public String getType() {
 			return type;
 		}
-		public synchronized boolean isBulk() {
+		public boolean isBulk() {
 			return isBulk;
 		}
-		public synchronized AdapterChainInitializer getAdapterChainInitializer() {
+		public AdapterChainInitializer getAdapterChainInitializer() {
 			return adapterChainInitializer;
 		}
-		public synchronized ResponseListener<IndexResponse> getIndexResponseListener() {
+		public ResponseListener<IndexResponse> getIndexResponseListener() {
 			return indexResponseListener;
 		}
-		public synchronized boolean doesStopOnError() {
+		public boolean doesStopOnError() {
 			return doesStopOnError;
 		}
 		
 		/*
 		 * setters ..
 		 */
-		public synchronized PipelineSettings inbound() {
-			isInbound = true;
-			return this;
+		private synchronized void setInbound(boolean isInbound) {
+			this.isInbound = isInbound;
 		}
-		public synchronized PipelineSettings outbound() {
-			isInbound = false;
-			return this;
-		}
-		public synchronized PipelineSettings node(Node node) {
+		private synchronized PipelineSettings node(Node node) {
 			this.node = node;
 			return this;
 		}
-		public synchronized PipelineSettings dataQueueCapacity(int dataQueueCapacity) {
+		private synchronized void dataQueueCapacity(int dataQueueCapacity) {
 			this.dataQueueCapacity = dataQueueCapacity;
-			return this;
 		}
-		public synchronized PipelineSettings adapterChainInitializer(AdapterChainInitializer adapterChainInitializer) {
+		private synchronized PipelineSettings adapterChainInitializer(AdapterChainInitializer adapterChainInitializer) {
 			this.adapterChainInitializer = adapterChainInitializer;
 			return this;
 		}
-		public synchronized PipelineSettings threadPoolSize(int threadPoolSize) {
+		private synchronized void threadPoolSize(int threadPoolSize) {
 			this.threadPoolSize = threadPoolSize;
-			return this;
 		}
-		public synchronized PipelineSettings host(String host) {
+		private synchronized void setClusterName(String clusterName) {
+			this.clusterName = clusterName;
+		}
+		private synchronized void host(String host) {
 			this.host = host;
-			return this;
 		}
-		public synchronized PipelineSettings port(int port) {
+		private synchronized void port(int port) {
 			this.port = port;
-			return this;
 		}
-		public synchronized PipelineSettings index(String index) {
+		private synchronized void index(String index) {
 			this.index = index;
-			return this;
 		}
-		public synchronized PipelineSettings type(String type) {
+		private synchronized void type(String type) {
 			this.type = type;
-			return this;
 		}
-		public synchronized PipelineSettings stopOnError(boolean doesStopOnError) {
+		private synchronized void stopOnError(boolean doesStopOnError) {
 			this.doesStopOnError = doesStopOnError;
-			return this;
 		}
 		/**
 		 * Note that bulk mode currently is not supported.
@@ -223,11 +332,10 @@ public class Pipeline implements Closeable {
 		 * @author sunhe
 		 * @date Mar 20, 2016
 		 */
-		public synchronized PipelineSettings bulk(boolean isBulk) {
+		private synchronized void bulk(boolean isBulk) {
 			this.isBulk = isBulk;
-			return this;
 		}
-		public synchronized PipelineSettings indexResponseListener(ResponseListener<IndexResponse> indexResponseListener) {
+		private synchronized PipelineSettings indexResponseListener(ResponseListener<IndexResponse> indexResponseListener) {
 			this.indexResponseListener = indexResponseListener;
 			return this;
 		}
@@ -275,7 +383,7 @@ public class Pipeline implements Closeable {
 					        .clusterName(clusterName)
 					        .node();
 			}
-			return settings.inbound()
+			return settings.setInbound()
 					.node(node)
 					.dataQueueCapacity(DEFAULT_DATA_QUEUE_CAPACITY)
 					.threadPoolSize(DEFAULT_THREAD_POOL_SIZE)
