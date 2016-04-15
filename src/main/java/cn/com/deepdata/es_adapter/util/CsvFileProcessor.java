@@ -131,7 +131,7 @@ public class CsvFileProcessor {
 			lineScanner = new Scanner(fileScanner.nextLine());
 			lineScanner.useDelimiter(delimiter);
 			while (lineScanner.hasNext()) {
-				keyList.add(lineScanner.next());
+				keyList.add(lineScanner.next().trim());
 			}
 		}
 		finally {
@@ -151,6 +151,8 @@ public class CsvFileProcessor {
 	}
 	
 	/**
+	 * TODO IndexOutOfBoundException <br/>
+	 * TODO Add support for asynchronous execution <br/>
 	 * 
 	 * @throws FileNotFoundException
 	 * @throws InterruptedException
@@ -159,6 +161,7 @@ public class CsvFileProcessor {
 	 */
 	public synchronized void process() throws FileNotFoundException, InterruptedException {
 		if (isDone()) {
+			System.out.println("File's already been processed, so skip " + file);
 			return;
 		}
 		
@@ -173,14 +176,23 @@ public class CsvFileProcessor {
 			filescanner = new Scanner(file, charset);
 			skipTitleLine(filescanner);
 			
-			while (filescanner.hasNext()) {
-				lineScanner = new Scanner(filescanner.nextLine());
-				lineScanner.useDelimiter(delimiter);
-				doc = new HashMap<String, Object>();
-				for (int i = 0; lineScanner.hasNext(); i++) {
-					doc.put(keyList.get(i), lineScanner.next());
+			while (filescanner.hasNextLine()) {
+				try {
+					lineScanner = new Scanner(filescanner.nextLine());
+					lineScanner.useDelimiter(delimiter);
+					doc = new HashMap<String, Object>();
+					for (int i = 0; lineScanner.hasNext(); i++) {
+						String val = lineScanner.next().trim();
+						if (val.equals("")) {
+							val = null;
+						}
+						doc.put(keyList.get(i), val);
+					}
+					pipeline.putData(doc);
 				}
-				pipeline.putData(doc);
+				catch (IndexOutOfBoundsException e) {
+					// do nothing
+				}
 			}
 			
 			markDone();

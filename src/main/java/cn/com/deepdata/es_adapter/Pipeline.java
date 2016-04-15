@@ -6,7 +6,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
@@ -18,10 +21,10 @@ import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.task.InboundTask;
 
 /**
- * {@link Pipeline} is an abstract of channel that connect a data source to an 
+ * {@link Pipeline} is an abstract of channel that connects a data source to an 
  * Elasticsearch cluster, so that data can be transmitted into or out of the 
  * cluster. Client can use this class to aggregate different components of the 
- * library and perform the main operations against Elasticsearch.
+ * elasticsearch-adapter library and perform operations against Elasticsearch.
  * <p/>
  * Note that this class MUST be closed by invoking the method {@link #close()} 
  * when not used any more.
@@ -29,11 +32,13 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO log <br/>
+ * TODO support log4j <br/>
  * TODO break point <br/>
  * TODO more advanced listener <br/>
- * TODO refine Javadoc
- * TODO support PipelineSettings deep copy
+ * TODO refine Javadoc <br/>
+ * TODO support PipelineSettings deep copy <br/>
+ * TODO settings have a bug <br/>
+ * TODO aggregation/delimiter apdater 
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -53,6 +58,7 @@ public class Pipeline implements Closeable {
 	 */
 	public static class PipelineSettings {
 		
+		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
 		public static final boolean DEFAULT_IS_INBOUND = true;
 		public static final int DEFAULT_DATA_QUEUE_CAPACITY = 4096;
 		public static final int DEFAULT_THREAD_POOL_SIZE = 8;
@@ -87,6 +93,18 @@ public class Pipeline implements Closeable {
 		 */
 		private int threadPoolSize;
 		
+		private String clusterName;
+		
+		/**
+		 * the host of one of the Elasticsearch instance in the cluster
+		 */
+		private String host;
+		
+		/**
+		 * the port of one of the Elasticsearch instance in the cluster
+		 */
+		private int port;
+		
 		private String index;
 		
 		private String type;
@@ -119,6 +137,15 @@ public class Pipeline implements Closeable {
 		}
 		public synchronized int getThreadPoolSize() {
 			return threadPoolSize;
+		}
+		public synchronized String getClusterName() {
+			return clusterName;
+		}
+		public synchronized String getHost() {
+			return host;
+		}
+		public synchronized int getPort() {
+			return port;
 		}
 		public synchronized String getIndex() {
 			return index;
@@ -164,6 +191,14 @@ public class Pipeline implements Closeable {
 		}
 		public synchronized PipelineSettings threadPoolSize(int threadPoolSize) {
 			this.threadPoolSize = threadPoolSize;
+			return this;
+		}
+		public synchronized PipelineSettings host(String host) {
+			this.host = host;
+			return this;
+		}
+		public synchronized PipelineSettings port(int port) {
+			this.port = port;
 			return this;
 		}
 		public synchronized PipelineSettings index(String index) {
@@ -229,13 +264,17 @@ public class Pipeline implements Closeable {
 		 */
 		public static PipelineSettings getDefaultSettings(String clusterName) {
 			PipelineSettings settings =  new PipelineSettings();
+			settings.clusterName = clusterName;
 			
 			// set default settings..
-			Node node = NodeBuilder.nodeBuilder()
-				        .settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
-				        .client(true)
-				        .clusterName(clusterName)
-				        .node();
+			Node node = null;
+			if (settings.getHost() == null) {
+				node = NodeBuilder.nodeBuilder()
+					        .settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
+					        .client(true)
+					        .clusterName(clusterName)
+					        .node();
+			}
 			return settings.inbound()
 					.node(node)
 					.dataQueueCapacity(DEFAULT_DATA_QUEUE_CAPACITY)
@@ -253,7 +292,7 @@ public class Pipeline implements Closeable {
 		 * @date 2016年3月18日
 		 */
 		public static PipelineSettings getDefaultSettings() {
-			return getDefaultSettings("elasticsearch");
+			return getDefaultSettings(DEFAULT_CLUSTER_NAME);
 		}
 		
 	}
@@ -308,7 +347,18 @@ public class Pipeline implements Closeable {
 		if (settings.getAdapterChainInitializer() != null) {
 			settings.getAdapterChainInitializer().initialize(adapterChain);
 		}
-		PipelineContext pipelineCtx = new PipelineContext(settings, settings.getNode().client(), 
+		Client client = null;
+		if (settings.getHost() == null) {
+			client = settings.getNode().client();
+		}
+		else {
+			client = new TransportClient(ImmutableSettings.settingsBuilder()
+							.put("cluster.name", settings.getClusterName())
+							.put("client.transport.sniff", true)
+							.build())
+					.addTransportAddress(new InetSocketTransportAddress(settings.getHost(), settings.getPort()));
+		}
+		PipelineContext pipelineCtx = new PipelineContext(settings, client, 
 				new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity()), adapterChain, 
 				pipeline);
 		pipeline.setPipelineCtx(pipelineCtx);

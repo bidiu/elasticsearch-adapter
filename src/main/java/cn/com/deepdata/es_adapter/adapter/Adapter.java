@@ -7,7 +7,7 @@ package cn.com.deepdata.es_adapter.adapter;
  * Note that implementation of this interface MUST be thread-safe.
  * <p/>
  * Typically it's highly recommended to extend {@link AbstractAdapter}, instead of 
- * implementing this interface.
+ * implementing this interface completely by your own.
  * 
  * @author sunhe
  * @date 2016年3月18日
