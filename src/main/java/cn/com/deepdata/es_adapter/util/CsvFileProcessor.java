@@ -10,16 +10,19 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import org.elasticsearch.action.index.IndexResponse;
+
 import cn.com.deepdata.es_adapter.Pipeline;
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
+import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings.SettingsBuilder;
+import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
+import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 /**
  * The file to be processed should end with ".csv" 
  * extension name.
  * <p/>
  * This class is thread-safe.
- * <p/>
- * TODO it's inefficient to have one pipeline per CsvFileProcessor
  * 
  * @author sunhe
  * @date Mar 20, 2016
@@ -31,6 +34,9 @@ public class CsvFileProcessor {
 	public static final String MARK_DONE_EXTENSION_NAME = "done";
 	
 	private PipelineSettings settings;
+	private SettingsBuilder builder;
+	private AdapterChainInitializer initializer;
+	private ResponseListener<IndexResponse> listener;
 	private List<String> keyList;
 	
 	private File file;
@@ -60,8 +66,9 @@ public class CsvFileProcessor {
 	 * @date Mar 21, 2016
 	 */
 	public CsvFileProcessor(File file, String charset, String delimiter, boolean hasTitleLine, 
-			PipelineSettings settings, boolean shareSingleMapper, boolean extractIndexTypeName) {
-		this.settings = settings;
+			SettingsBuilder builder, boolean shareSingleMapper, boolean extractIndexTypeName, 
+			AdapterChainInitializer initializer, ResponseListener<IndexResponse> listener) {
+		this.builder = builder;
 		keyList = new ArrayList<String>();
 		this.file = file;
 		this.charset = charset;
@@ -69,6 +76,8 @@ public class CsvFileProcessor {
 		this.hasTitleLine = hasTitleLine;
 		this.shareSingleMapper = shareSingleMapper;
 		this.extractIndexTypeName = extractIndexTypeName;
+		this.initializer = initializer;
+		this.listener = listener;
 	}
 	
 	private boolean isDone() {
@@ -99,13 +108,14 @@ public class CsvFileProcessor {
 	 */
 	private void extractIndexType(String filename) {
 		if (! extractIndexTypeName) {
+			settings = builder.build();
 			return;
 		}
 		
 		filename = FilenameUtil.excludeExtensionName(filename);
 		String index = filename.substring(0, filename.indexOf("-"));
 		String type = filename.substring(filename.indexOf("-") + 1);
-		settings.index(index).type(type);
+		settings = builder.index(index).type(type).build();
 	}
 	
 	private void extractKeyList() throws FileNotFoundException {
@@ -172,7 +182,7 @@ public class CsvFileProcessor {
 		
 		try {
 			extractKeyList();
-			pipeline = Pipeline.build(settings);
+			pipeline = Pipeline.build(settings, initializer, listener);
 			filescanner = new Scanner(file, charset);
 			skipTitleLine(filescanner);
 			

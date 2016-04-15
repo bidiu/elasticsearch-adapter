@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
+import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings.SettingsBuilder;
 import cn.com.deepdata.es_adapter.adapter.Adapter;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
+import cn.com.deepdata.es_adapter.listener.DefaultIndexResponseListener;
 import cn.com.deepdata.es_adapter.util.CsvFileProcessor;
 import cn.com.deepdata.es_adapter.util.FilenameUtil;
 
@@ -91,23 +93,24 @@ public class SoftwareCopyrightTransfer {
 			msg.put("province", extractProvince(file.getName()));
 			msg.put("city", extractCity(file.getName()));
 			
-			// add adapter
-			PipelineSettings settings = PipelineSettings.getDefaultSettings()
+			// instantiate builder
+			SettingsBuilder builder = PipelineSettings.builder()
 					.index(INDEX_NAME)
 					.type(TYPE_NAME)
 					.threadPoolSize(THREAD_POOL_SIZE)
 					.host(HOST)
-					.port(PORT)
-					.adapterChainInitializer(new AdapterChainInitializer() {
+					.port(PORT);
+			
+			// process the file
+			new CsvFileProcessor(file, "UTF-8", ",", false, 
+					builder, true, false, new AdapterChainInitializer() {
 						
 						@Override
 						public void initialize(AdapterChain adapterChain) {
 							adapterChain.addLast(adapter, msg);
 						}
-						
-					});
-			// process the file
-			new CsvFileProcessor(file, "UTF-8", ",", false, settings, true, false).process();
+					}, new DefaultIndexResponseListener())
+					.process();
 		}
 	}
 	

@@ -1,12 +1,15 @@
 package cn.com.deepdata.es_adapter.adapter;
 
+import cn.com.deepdata.es_adapter.Pipeline;
+
 /**
  * Adapt one specific type of data to another, or from a
  * one specific type to the same, but with some modification.
  * <p/>
- * Note that implementation of this interface MUST be thread-safe.
+ * Note that implementation of this interface MUST be thread-safe, if you 
+ * plan to share it across multiple {@link Pipeline}s.
  * <p/>
- * Typically it's highly recommended to extend {@link AbstractAdapter}, instead of 
+ * Typically, it's HIGHLY recommended to extend {@link AbstractAdapter}, instead of 
  * implementing this interface completely by your own.
  * 
  * @author sunhe

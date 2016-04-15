@@ -16,7 +16,7 @@ import java.util.Map;
 public abstract class AbstractAdapter implements Adapter {
 	
 	@Override
-	public Object inboundAdapt(AdapterContext ctx, Object data) {
+	public final Object inboundAdapt(AdapterContext ctx, Object data) {
 		return ctx.fireNextAdapter(inboundAdapt(data, ctx.getMsg()));
 	}
 	
@@ -34,7 +34,7 @@ public abstract class AbstractAdapter implements Adapter {
 	public abstract Object inboundAdapt(Object data, Map<String, Object> msg);
 	
 	@Override
-	public Object outboundAdapt(AdapterContext ctx, Object data) {
+	public final Object outboundAdapt(AdapterContext ctx, Object data) {
 		return ctx.fireNextAdapter(outboundAdapt(data, ctx.getMsg()));
 	}
 	

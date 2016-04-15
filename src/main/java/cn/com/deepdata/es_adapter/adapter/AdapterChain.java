@@ -84,7 +84,7 @@ public class AdapterChain {
 	 * @author sunhe
 	 * @date 2016年3月18日
 	 */
-	public Object fireFirstAdapter(Object data) {
+	public Object fireAdapters(Object data) {
 		if (firstAdapter == null) {
 			// not any adapter available on the chain
 			return data;
