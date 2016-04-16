@@ -38,7 +38,8 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * TODO more advanced listener <br/>
  * TODO refine Javadoc <br/>
  * TODO aggregation/delimiter apdater <br/>
- * TODO bulk mode
+ * TODO bulk mode <br/>
+ * TODO adapter exception, thread model when exception occurs
  * 
  * @author sunhe
  * @date 2016年3月18日
