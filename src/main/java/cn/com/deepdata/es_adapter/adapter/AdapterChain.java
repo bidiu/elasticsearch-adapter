@@ -32,7 +32,7 @@ public class AdapterChain {
 	}
 	
 	/**
-	 * Add a adapter to the rear of adapter chain
+	 * Add an adapter to the rear of adapter chain
 	 * 
 	 * @param adapter
 	 * @return

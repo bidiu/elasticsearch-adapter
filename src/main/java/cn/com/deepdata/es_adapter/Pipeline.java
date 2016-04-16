@@ -37,8 +37,6 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * TODO break point <br/>
  * TODO more advanced listener <br/>
  * TODO refine Javadoc <br/>
- * TODO support PipelineSettings deep copy <br/>
- * TODO settings have a bug <br/>
  * TODO aggregation/delimiter apdater <br/>
  * TODO bulk mode
  * 

@@ -20,6 +20,7 @@ public class PipelineTest {
 		return doc;
 	}
 	
+	@Ignore
 	@Test
 	public void test() throws InterruptedException {
 		int total = 100000;
