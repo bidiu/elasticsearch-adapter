@@ -2,10 +2,12 @@ package cn.com.deepdata.es_adapter;
 
 import java.util.concurrent.BlockingQueue;
 
+import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
 
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
+import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 /**
  * This class is {@link Pipeline pipeline} context.
@@ -27,39 +29,45 @@ public class PipelineContext {
 	
 	private Pipeline pipeline;
 	
+	private ResponseListener<? extends ActionResponse> responseListener;
+	
 	private Object dataQueuePoisonObj;
 	
 	public PipelineContext(PipelineSettings settings, Client client, 
 			BlockingQueue<Object> dataQueue, AdapterChain adapterChain, 
-			Pipeline pipeline) {
+			Pipeline pipeline, ResponseListener<? extends ActionResponse> responseListener) {
 		this.settings = settings;
 		this.client = client;
 		this.dataQueue = dataQueue;
 		this.adapterChain = adapterChain;
 		this.pipeline = pipeline;
+		this.responseListener = responseListener;
 		dataQueuePoisonObj = new Object();
 	}
 	
 	/*
 	 * Getters ..
 	 */
-	public synchronized PipelineSettings getSettings() {
+	public PipelineSettings getSettings() {
 		return settings;
 	}
-	public synchronized Client getClient() {
+	public Client getClient() {
 		return client;
 	}
-	public synchronized BlockingQueue<Object> getDataQueue() {
+	public BlockingQueue<Object> getDataQueue() {
 		return dataQueue;
 	}
-	public synchronized AdapterChain getAdapterChain() {
+	public AdapterChain getAdapterChain() {
 		return adapterChain;
 	}
-	public synchronized Pipeline getPipeline() {
+	public Pipeline getPipeline() {
 		return pipeline;
 	}
-	public synchronized Object getDataQueuePoisonObj() {
+	public Object getDataQueuePoisonObj() {
 		return dataQueuePoisonObj;
+	}
+	public ResponseListener<? extends ActionResponse> getResponseListener() {
+		return responseListener;
 	}
 	
 }

@@ -24,10 +24,10 @@ public class PipelineTest {
 	@Test
 	public void test() throws InterruptedException {
 		int total = 100000;
-		PipelineSettings settings = PipelineSettings.getDefaultSettings()
-				.index("library6")
-				.type("book")
-				.threadPoolSize(8);
+		PipelineSettings settings = PipelineSettings.builder()
+				.index("index-test111")
+				.type("type-test111")
+				.build();
 		Pipeline pipeline = Pipeline.build(settings);
 		
 		long start = System.currentTimeMillis();

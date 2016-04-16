@@ -1,7 +1,9 @@
 package cn.com.deepdata.es_adapter.adapter;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The adapter chain composed of several adapters and its meta data.
@@ -30,7 +32,7 @@ public class AdapterChain {
 	}
 	
 	/**
-	 * Add a adapter to the rear of adapter chain
+	 * Add an adapter to the rear of adapter chain
 	 * 
 	 * @param adapter
 	 * @return
@@ -39,7 +41,20 @@ public class AdapterChain {
 	 * @date Mar 18, 2016
 	 */
 	public synchronized AdapterChain addLast(Adapter adapter) {
+		return addLast(adapter, new HashMap<String, Object>());
+	}
+	
+	/**
+	 * 
+	 * @param adapter
+	 * @param msg
+	 * @return
+	 * @author sunhe
+	 * @date 2016年4月5日
+	 */
+	public synchronized AdapterChain addLast(Adapter adapter, Map<String, Object> msg) {
 		AdapterContext adapterCtx = new AdapterContext();
+		adapterCtx.setMsg(msg);
 		
 		if (adapterCtxList.size() == 0) {
 			firstAdapter = adapter;
@@ -69,7 +84,7 @@ public class AdapterChain {
 	 * @author sunhe
 	 * @date 2016年3月18日
 	 */
-	public Object fireFirstAdapter(Object data) {
+	public Object fireAdapters(Object data) {
 		if (firstAdapter == null) {
 			// not any adapter available on the chain
 			return data;

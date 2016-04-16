@@ -9,9 +9,12 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
+import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 /**
  * Runnable task for inbound mode.
+ * <p/>
+ * TODO thread model, especially exception related, of listener
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -33,7 +36,7 @@ public class InboundTask extends BoundTask {
 			while ((data = dataQueue.take()) != dataQueuePoisonObj) {
 				try {
 					// adapt data to JSON format
-					data = adapterChain.fireFirstAdapter(data);
+					data = adapterChain.fireAdapters(data);
 					
 					// build index request
 					if (data instanceof Map<?, ?>) {
@@ -59,11 +62,11 @@ public class InboundTask extends BoundTask {
 					
 					// fire index request
 					indexResponse = indexRequestBuilder.execute().actionGet();
-					settings.getIndexResponseListener().onResponse(indexResponse);
+					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onResponse(indexResponse);
 				}
 				catch (UnsupportedJsonFormatException e) {
 					e.printStackTrace();
-					settings.getIndexResponseListener().onFailure(e);
+					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onFailure(e);
 					if (settings.doesStopOnError()) {
 						break;
 					}

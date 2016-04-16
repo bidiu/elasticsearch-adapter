@@ -6,8 +6,8 @@ package cn.com.deepdata.es_adapter.adapter;
  * <p/>
  * Note that implementation of this interface MUST be thread-safe.
  * <p/>
- * Typically it's highly recommended to extend {@link AbstractAdapter}, instead of 
- * implementing this interface.
+ * Typically, it's HIGHLY recommended to extend {@link AbstractAdapter}, instead of 
+ * implementing this interface completely by your own.
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -17,6 +17,8 @@ public interface Adapter {
 	/**
 	 * Note that parameter "ctx" MUST NOT be altered in this method, 
 	 * or the outcome is undefined.
+	 * <p/>
+	 * TODO except the msg
 	 * 
 	 * @param ctx
 	 * @param data
@@ -31,6 +33,9 @@ public interface Adapter {
 	/**
 	 * Note that parameter "ctx" MUST NOT be altered in this method, 
 	 * or the outcome is undefined.
+	 * <p/>
+	 * TODO except the msg
+	 * 
 	 * 
 	 * @param ctx
 	 * @param data

@@ -1,13 +1,17 @@
 package cn.com.deepdata.es_adapter;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.node.Node;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
 
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
@@ -18,20 +22,23 @@ import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.task.InboundTask;
 
 /**
- * {@link Pipeline} is an abstract of channel that connect a data source to an 
+ * {@link Pipeline} is an abstract of channel that connects a data source to an 
  * Elasticsearch cluster, so that data can be transmitted into or out of the 
  * cluster. Client can use this class to aggregate different components of the 
- * library and perform the main operations against Elasticsearch.
+ * elasticsearch-adapter library and perform operations against Elasticsearch.
  * <p/>
  * Note that this class MUST be closed by invoking the method {@link #close()} 
- * when not used any more.
+ * when not used any more, or resource leak (like local bound port) could occur.
  * <p/>
  * This class is thread-safe.
  * <p/>
  * 
- * TODO log <br/>
+ * TODO support log4j <br/>
  * TODO break point <br/>
- * TODO more advanced listener
+ * TODO more advanced listener <br/>
+ * TODO refine Javadoc <br/>
+ * TODO aggregation/delimiter apdater <br/>
+ * TODO bulk mode
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -41,21 +48,133 @@ public class Pipeline implements Closeable {
 	/**
 	 * This class is {@link Pipeline} settings.
 	 * <p/>
-	 * Note that different {@link Pipeline} MUST NOT share the same 
-	 * {@link PipelineSettings} instance.
-	 * <p/>
-	 * And this class is thread-safe.
+	 * The instance of this class is immutable and can be used repetitively.
 	 * 
 	 * @author sunhe
 	 * @date 2016年3月18日
 	 */
 	public static class PipelineSettings {
 		
+		// settings name
+		public static final String IS_INBOUND = "isInbound";
+		public static final String DATA_QUEUE_CAPACITY = "dataQueueCapacity";
+		public static final String THREAD_POOL_SIZE = "threadPoolSize";
+		public static final String CLUSTER_NAME = "clusterName";
+		public static final String HOST = "host";
+		public static final String PORT = "port";
+		public static final String INDEX = "index";
+		public static final String TYPE = "type";
+		public static final String IS_BULK = "isBulk";
+		public static final String DOES_STOP_ON_ERROR = "doesStopOnError";
+		
+		// default value
 		public static final boolean DEFAULT_IS_INBOUND = true;
 		public static final int DEFAULT_DATA_QUEUE_CAPACITY = 4096;
 		public static final int DEFAULT_THREAD_POOL_SIZE = 8;
+		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
+		public static final int DEFAULT_PORT = 9300;
 		public static final boolean DEFAULT_IS_BULK = false;
 		public static final boolean DEFAULT_DOES_STOP_ON_ERROR = false;
+		
+		/**
+		 * Builder that can build {@link PipelineSettings}.
+		 * <p/>
+		 * Some settings have reasonable default value, so you do have 
+		 * to set all of them, unless you really need to.
+		 * 
+		 * @author sunhe
+		 * @date Apr 15, 2016
+		 */
+		public static class SettingsBuilder {
+			
+			private Map<String, String> map;
+			
+			private SettingsBuilder() {
+				map = new ConcurrentHashMap<String, String>();
+	
+				// here set the default value
+				map.put(IS_INBOUND, String.valueOf(DEFAULT_IS_INBOUND));
+				map.put(DATA_QUEUE_CAPACITY, String.valueOf(DEFAULT_DATA_QUEUE_CAPACITY));
+				map.put(THREAD_POOL_SIZE, String.valueOf(DEFAULT_THREAD_POOL_SIZE));
+				map.put(CLUSTER_NAME, DEFAULT_CLUSTER_NAME);
+				map.put(PORT, String.valueOf(DEFAULT_PORT));
+				map.put(IS_BULK, String.valueOf(DEFAULT_IS_BULK));
+				map.put(DOES_STOP_ON_ERROR, String.valueOf(DEFAULT_DOES_STOP_ON_ERROR));
+			}
+			
+			/*
+			 * setters ..
+			 */
+			public SettingsBuilder inbound() {
+				map.put(IS_INBOUND, String.valueOf(true));
+				return this;
+			}
+			public SettingsBuilder outbound() {
+				map.put(IS_INBOUND, String.valueOf(false));
+				return this;
+			}
+			public SettingsBuilder dataQueueCapacity(int dataQueueCapacity) {
+				map.put(DATA_QUEUE_CAPACITY, String.valueOf(dataQueueCapacity));
+				return this;
+			}
+			public SettingsBuilder threadPoolSize(int threadPoolSize) {
+				map.put(THREAD_POOL_SIZE, String.valueOf(threadPoolSize));
+				return this;
+			}
+			public SettingsBuilder clusterName(String clusterName) {
+				map.put(CLUSTER_NAME, clusterName);
+				return this;
+			}
+			public SettingsBuilder host(String host) {
+				map.put(HOST, host);
+				return this;
+			}
+			public SettingsBuilder port(int port) {
+				map.put(PORT, String.valueOf(port));
+				return this;
+			}
+			public SettingsBuilder index(String index) {
+				map.put(INDEX, index);
+				return this;
+			}
+			public SettingsBuilder type(String type) {
+				map.put(TYPE, type);
+				return this;
+			}
+			public SettingsBuilder stopOnError(boolean doesStopOnError) {
+				map.put(DOES_STOP_ON_ERROR, String.valueOf(doesStopOnError));
+				return this;
+			}
+			public SettingsBuilder bulk(boolean isBulk) {
+				map.put(IS_BULK, String.valueOf(isBulk));
+				return this;
+			}
+			
+			/**
+			 * Build a {@link PipelineSettings}.
+			 * 
+			 * @return
+			 * @author sunhe
+			 * @date 2016年4月15日
+			 */
+			public PipelineSettings build() {
+				PipelineSettings settings =  new PipelineSettings();
+				
+				// set all of the settings
+				settings.setInbound(Boolean.valueOf(map.get(IS_INBOUND)));
+				settings.setDataQueueCapacity(Integer.parseInt(map.get(DATA_QUEUE_CAPACITY)));
+				settings.setThreadPoolSize(Integer.parseInt(map.get(THREAD_POOL_SIZE)));
+				settings.setClusterName(map.get(CLUSTER_NAME));
+				settings.setHost(map.get(HOST));
+				settings.setPort(Integer.parseInt(map.get(PORT)));
+				settings.setIndex(map.get(INDEX));
+				settings.setType(map.get(TYPE));
+				settings.setStopOnError(Boolean.valueOf(map.get(DOES_STOP_ON_ERROR)));
+				settings.setBulk(Boolean.valueOf(map.get(IS_BULK)));
+				return settings;
+			}
+			
+		}
 		
 		/**
 		 * Inbound mode means that data are transmitted into Elasticsearch, while
@@ -66,11 +185,6 @@ public class Pipeline implements Closeable {
 		private boolean isInbound;
 		
 		/**
-		 * Elasticsearch node to be used to generate a client.
-		 */
-		private Node node;
-		
-		/**
 		 * All data will be staged into a queue for a while, this attribute is 
 		 * the queue's size - the number of data unit, typically document.
 		 * <p/>
@@ -78,12 +192,22 @@ public class Pipeline implements Closeable {
 		 */
 		private int dataQueueCapacity;
 		
-		private AdapterChainInitializer adapterChainInitializer;
-		
 		/**
 		 * 8 by default.
 		 */
 		private int threadPoolSize;
+		
+		private String clusterName;
+		
+		/**
+		 * the host of one of the Elasticsearch instance in the cluster
+		 */
+		private String host;
+		
+		/**
+		 * the port of one of the Elasticsearch instance in the cluster
+		 */
+		private int port;
 		
 		private String index;
 		
@@ -97,8 +221,6 @@ public class Pipeline implements Closeable {
 		
 		private boolean doesStopOnError;
 		
-		private ResponseListener<IndexResponse> indexResponseListener;
-		
 		private PipelineSettings() {
 			
 		}
@@ -106,93 +228,73 @@ public class Pipeline implements Closeable {
 		/*
 		 * getters ..
 		 */
-		public synchronized boolean isInbound() {
+		public boolean isInbound() {
 			return isInbound;
 		}
-		public synchronized Node getNode() {
-			return node;
-		}
-		public synchronized int getDataQueueCapacity() {
+		public int getDataQueueCapacity() {
 			return dataQueueCapacity;
 		}
-		public synchronized int getThreadPoolSize() {
+		public int getThreadPoolSize() {
 			return threadPoolSize;
 		}
-		public synchronized String getIndex() {
+		public String getClusterName() {
+			return clusterName;
+		}
+		public String getHost() {
+			return host;
+		}
+		public int getPort() {
+			return port;
+		}
+		public String getIndex() {
 			return index;
 		}
-		public synchronized String getType() {
+		public String getType() {
 			return type;
 		}
-		public synchronized boolean isBulk() {
+		public boolean isBulk() {
 			return isBulk;
 		}
-		public synchronized AdapterChainInitializer getAdapterChainInitializer() {
-			return adapterChainInitializer;
-		}
-		public synchronized ResponseListener<IndexResponse> getIndexResponseListener() {
-			return indexResponseListener;
-		}
-		public synchronized boolean doesStopOnError() {
+		public boolean doesStopOnError() {
 			return doesStopOnError;
 		}
 		
 		/*
 		 * setters ..
 		 */
-		public synchronized PipelineSettings inbound() {
-			isInbound = true;
-			return this;
+		private synchronized void setInbound(boolean isInbound) {
+			this.isInbound = isInbound;
 		}
-		public synchronized PipelineSettings outbound() {
-			isInbound = false;
-			return this;
-		}
-		public synchronized PipelineSettings node(Node node) {
-			this.node = node;
-			return this;
-		}
-		public synchronized PipelineSettings dataQueueCapacity(int dataQueueCapacity) {
+		private synchronized void setDataQueueCapacity(int dataQueueCapacity) {
 			this.dataQueueCapacity = dataQueueCapacity;
-			return this;
 		}
-		public synchronized PipelineSettings adapterChainInitializer(AdapterChainInitializer adapterChainInitializer) {
-			this.adapterChainInitializer = adapterChainInitializer;
-			return this;
-		}
-		public synchronized PipelineSettings threadPoolSize(int threadPoolSize) {
+		private synchronized void setThreadPoolSize(int threadPoolSize) {
 			this.threadPoolSize = threadPoolSize;
-			return this;
 		}
-		public synchronized PipelineSettings index(String index) {
+		private synchronized void setClusterName(String clusterName) {
+			this.clusterName = clusterName;
+		}
+		private synchronized void setHost(String host) {
+			this.host = host;
+		}
+		private synchronized void setPort(int port) {
+			this.port = port;
+		}
+		private synchronized void setIndex(String index) {
 			this.index = index;
-			return this;
 		}
-		public synchronized PipelineSettings type(String type) {
+		private synchronized void setType(String type) {
 			this.type = type;
-			return this;
 		}
-		public synchronized PipelineSettings stopOnError(boolean doesStopOnError) {
+		private synchronized void setStopOnError(boolean doesStopOnError) {
 			this.doesStopOnError = doesStopOnError;
-			return this;
 		}
-		/**
-		 * Note that bulk mode currently is not supported.
-		 * <p/>
-		 * TODO
-		 * 
-		 * @param isBulk
-		 * @return
-		 * @author sunhe
-		 * @date Mar 20, 2016
-		 */
-		public synchronized PipelineSettings bulk(boolean isBulk) {
+		private synchronized void setBulk(boolean isBulk) {
 			this.isBulk = isBulk;
-			return this;
 		}
-		public synchronized PipelineSettings indexResponseListener(ResponseListener<IndexResponse> indexResponseListener) {
-			this.indexResponseListener = indexResponseListener;
-			return this;
+		
+		public static SettingsBuilder builder() {
+			return new SettingsBuilder();
 		}
 		
 		/**
@@ -214,44 +316,6 @@ public class Pipeline implements Closeable {
 			else {
 				return true;
 			}
-		}
-
-		/**
-		 * Get pipeline's default settings.
-		 * 
-		 * @param clusterName
-		 * 		Elasticsearch cluster name
-		 * @return
-		 * @author sunhe
-		 * @date Mar 18, 2016
-		 */
-		public static PipelineSettings getDefaultSettings(String clusterName) {
-			PipelineSettings settings =  new PipelineSettings();
-			
-			// set default settings..
-			Node node = NodeBuilder.nodeBuilder()
-				        .settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
-				        .client(true)
-				        .clusterName(clusterName)
-				        .node();
-			return settings.inbound()
-					.node(node)
-					.dataQueueCapacity(DEFAULT_DATA_QUEUE_CAPACITY)
-					.threadPoolSize(DEFAULT_THREAD_POOL_SIZE)
-					.bulk(DEFAULT_IS_BULK)
-					.indexResponseListener(new DefaultIndexResponseListener())
-					.stopOnError(DEFAULT_DOES_STOP_ON_ERROR);
-		}
-		
-		/**
-		 * Get pipeline's default settings with cluster name "elasticsearch".
-		 * 
-		 * @return
-		 * @author sunhe
-		 * @date 2016年3月18日
-		 */
-		public static PipelineSettings getDefaultSettings() {
-			return getDefaultSettings("elasticsearch");
 		}
 		
 	}
@@ -281,35 +345,54 @@ public class Pipeline implements Closeable {
 	private synchronized void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
-
+	
 	/**
-	 * Build a pipeline with a given settings.
-	 * <p/>
-	 * Note that after invoking this methods, the parameter "settings"
-	 * MUST be discarded from outside, which means the settings MUST 
-	 * NOT be altered any more from outside, otherwise the outcome is 
-	 * undefined.
+	 * Build the pipeline.
 	 * 
 	 * @param settings
+	 * @param adapterChainInitializer
+	 * @param indexResponseListener
 	 * @return
 	 * @author sunhe
-	 * @date 2016年3月18日
+	 * @date Apr 15, 2016
 	 */
-	public static Pipeline build(PipelineSettings settings) {
+	@SuppressWarnings("resource")
+	public static Pipeline build(
+			PipelineSettings settings, 
+			AdapterChainInitializer adapterChainInitializer, 
+			ResponseListener<? extends ActionResponse> responseListener) {
 		if (! settings.validate()) {
 			throw new IllegalArgumentException("Invalid settings, cannot build pipeline.");
 		}
 		
 		Pipeline pipeline = new Pipeline();
+		
 		// pipeline context related ..
 		AdapterChain adapterChain = new AdapterChain(settings.isInbound());
-		if (settings.getAdapterChainInitializer() != null) {
-			settings.getAdapterChainInitializer().initialize(adapterChain);
+		if (adapterChainInitializer != null) {
+			adapterChainInitializer.initialize(adapterChain);
 		}
-		PipelineContext pipelineCtx = new PipelineContext(settings, settings.getNode().client(), 
+		Client client = null;
+		if (settings.getHost() == null) {
+			client = NodeBuilder.nodeBuilder()
+			        .settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
+			        .client(true)
+			        .clusterName(settings.getClusterName())
+			        .node()
+			        .client();
+		}
+		else {
+			client = new TransportClient(ImmutableSettings.settingsBuilder()
+						.put("cluster.name", settings.getClusterName())
+						.put("client.transport.sniff", true)
+						.build())
+					.addTransportAddress(new InetSocketTransportAddress(settings.getHost(), settings.getPort()));
+		}
+		PipelineContext pipelineCtx = new PipelineContext(settings, client, 
 				new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity()), adapterChain, 
-				pipeline);
+				pipeline, responseListener);
 		pipeline.setPipelineCtx(pipelineCtx);
+		
 		// thread pool related ..
 		pipeline.setExecutorService(Executors.newFixedThreadPool(settings.getThreadPoolSize()));
 		for (int i = 0; i < settings.getThreadPoolSize(); i++) {
@@ -321,6 +404,48 @@ public class Pipeline implements Closeable {
 			}
 		}
 		return pipeline;
+	}
+	
+	/**
+	 * Build the pipeline.
+	 * 
+	 * @param settings
+	 * @param adapterChainInitializer
+	 * @return
+	 * @author sunhe
+	 * @date Apr 15, 2016
+	 */
+	public static Pipeline build(
+			PipelineSettings settings, 
+			AdapterChainInitializer adapterChainInitializer) {
+		return build(settings, adapterChainInitializer, new DefaultIndexResponseListener());
+	}
+	
+	/**
+	 * Build the pipeline.
+	 * 
+	 * @param settings
+	 * @param responseListener
+	 * @return
+	 * @author sunhe
+	 * @date Apr 15, 2016
+	 */
+	public static Pipeline build(
+			PipelineSettings settings, 
+			ResponseListener<? extends ActionResponse> responseListener) {
+		return build(settings, null, responseListener);
+	}
+
+	/**
+	 * Build the pipeline.
+	 * 
+	 * @param settings
+	 * @return
+	 * @author sunhe
+	 * @date 2016年3月18日
+	 */
+	public static Pipeline build(PipelineSettings settings) {
+		return build(settings, null, new DefaultIndexResponseListener());
 	}
 	
 	/**
