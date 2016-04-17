@@ -33,13 +33,10 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO support log4j <br/>
- * TODO break point <br/>
  * TODO more advanced listener <br/>
  * TODO refine Javadoc <br/>
  * TODO aggregation/delimiter apdater <br/>
  * TODO bulk mode <br/>
- * TODO adapter exception, thread model when exception occurs
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -66,7 +63,6 @@ public class Pipeline implements Closeable {
 		public static final String INDEX = "index";
 		public static final String TYPE = "type";
 		public static final String IS_BULK = "isBulk";
-		public static final String DOES_STOP_ON_ERROR = "doesStopOnError";
 		
 		// default value
 		public static final boolean DEFAULT_IS_INBOUND = true;
@@ -75,7 +71,6 @@ public class Pipeline implements Closeable {
 		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
 		public static final int DEFAULT_PORT = 9300;
 		public static final boolean DEFAULT_IS_BULK = false;
-		public static final boolean DEFAULT_DOES_STOP_ON_ERROR = false;
 		
 		/**
 		 * Builder that can build {@link PipelineSettings}.
@@ -100,7 +95,6 @@ public class Pipeline implements Closeable {
 				map.put(CLUSTER_NAME, DEFAULT_CLUSTER_NAME);
 				map.put(PORT, String.valueOf(DEFAULT_PORT));
 				map.put(IS_BULK, String.valueOf(DEFAULT_IS_BULK));
-				map.put(DOES_STOP_ON_ERROR, String.valueOf(DEFAULT_DOES_STOP_ON_ERROR));
 			}
 			
 			/*
@@ -142,10 +136,6 @@ public class Pipeline implements Closeable {
 				map.put(TYPE, type);
 				return this;
 			}
-			public SettingsBuilder stopOnError(boolean doesStopOnError) {
-				map.put(DOES_STOP_ON_ERROR, String.valueOf(doesStopOnError));
-				return this;
-			}
 			public SettingsBuilder bulk(boolean isBulk) {
 				map.put(IS_BULK, String.valueOf(isBulk));
 				return this;
@@ -170,7 +160,6 @@ public class Pipeline implements Closeable {
 				settings.setPort(Integer.parseInt(map.get(PORT)));
 				settings.setIndex(map.get(INDEX));
 				settings.setType(map.get(TYPE));
-				settings.setStopOnError(Boolean.valueOf(map.get(DOES_STOP_ON_ERROR)));
 				settings.setBulk(Boolean.valueOf(map.get(IS_BULK)));
 				return settings;
 			}
@@ -220,8 +209,6 @@ public class Pipeline implements Closeable {
 		 */
 		private boolean isBulk;
 		
-		private boolean doesStopOnError;
-		
 		private PipelineSettings() {
 			
 		}
@@ -256,9 +243,6 @@ public class Pipeline implements Closeable {
 		public boolean isBulk() {
 			return isBulk;
 		}
-		public boolean doesStopOnError() {
-			return doesStopOnError;
-		}
 		
 		/*
 		 * setters ..
@@ -286,9 +270,6 @@ public class Pipeline implements Closeable {
 		}
 		private synchronized void setType(String type) {
 			this.type = type;
-		}
-		private synchronized void setStopOnError(boolean doesStopOnError) {
-			this.doesStopOnError = doesStopOnError;
 		}
 		private synchronized void setBulk(boolean isBulk) {
 			this.isBulk = isBulk;
@@ -336,6 +317,9 @@ public class Pipeline implements Closeable {
 	 */
 	public synchronized boolean isClosed() {
 		return isClosed;
+	}
+	public synchronized Client getClient() {
+		return pipelineCtx.getClient();
 	}
 	private synchronized ExecutorService getExecutorService() {
 		return executorService;

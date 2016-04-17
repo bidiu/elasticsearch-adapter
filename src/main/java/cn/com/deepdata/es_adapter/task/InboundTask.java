@@ -2,19 +2,17 @@ package cn.com.deepdata.es_adapter.task;
 
 import java.util.Map;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
+import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 /**
  * Runnable task for inbound mode.
- * <p/>
- * TODO thread model, especially exception related, of listener
  * 
  * @author sunhe
  * @date 2016年3月18日
@@ -64,26 +62,18 @@ public class InboundTask extends BoundTask {
 					indexResponse = indexRequestBuilder.execute().actionGet();
 					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onResponse(indexResponse);
 				}
-				catch (UnsupportedJsonFormatException e) {
-					e.printStackTrace();
-					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onFailure(e);
-					if (settings.doesStopOnError()) {
-						break;
+				catch (Exception e) {
+					try {
+						((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener())
+								.onFailure(new ExceptionEvent(e, data));
 					}
-				}
-				catch (ElasticsearchException e) {
-					// TODO listener
-					e.printStackTrace();
-					if (settings.doesStopOnError()) {
-						break;
+					catch (RuntimeException runtimeE) {
+						runtimeE.printStackTrace();
 					}
 				}
 			}
 		}
 		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		catch (RuntimeException e) {
 			e.printStackTrace();
 		}
 		finally {

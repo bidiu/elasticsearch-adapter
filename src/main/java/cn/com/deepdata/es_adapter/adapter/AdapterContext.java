@@ -2,6 +2,8 @@ package cn.com.deepdata.es_adapter.adapter;
 
 import java.util.Map;
 
+import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+
 /**
  * Adapter context, mainly for invoking next {@link Adapter adapter} on the {@link AdapterChain adapter chain}.
  * <p/>
@@ -19,6 +21,10 @@ public class AdapterContext {
 	private AdapterContext nextAdapterCtx;
 	
 	private Map<String, Object> msg;
+	
+	public synchronized boolean isInbound() {
+		return adapterChain.isInbound();
+	}
 
 	public synchronized void setAdapterChain(AdapterChain adapterChain) {
 		this.adapterChain = adapterChain;
@@ -40,7 +46,7 @@ public class AdapterContext {
 		this.msg = msg;
 	}
 
-	public Object fireNextAdapter(Object data) {
+	public Object fireNextAdapter(Object data) throws Exception {
 		if (nextAdapter != null) {
 			if (adapterChain.isInbound()) {
 				return nextAdapter.inboundAdapt(nextAdapterCtx, data);
@@ -52,6 +58,16 @@ public class AdapterContext {
 		else {
 			// current adapter is the last on the chain
 			return data;
+		}
+	}
+	
+	public Object fireNextException(ExceptionEvent event) throws Exception {
+		if (nextAdapter != null) {
+			return nextAdapter.onException(nextAdapterCtx, event);
+		}
+		else {
+			// current adapter is the last on the chain
+			throw event.getCause();
 		}
 	}
 	

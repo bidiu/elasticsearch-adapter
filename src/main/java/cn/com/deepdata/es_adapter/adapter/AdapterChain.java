@@ -82,9 +82,10 @@ public class AdapterChain {
 	 * @return
 	 * 		the resulting data
 	 * @author sunhe
+	 * @throws Exception 
 	 * @date 2016年3月18日
 	 */
-	public Object fireAdapters(Object data) {
+	public Object fireAdapters(Object data) throws Exception {
 		if (firstAdapter == null) {
 			// not any adapter available on the chain
 			return data;

@@ -1,6 +1,6 @@
 package cn.com.deepdata.es_adapter.listener;
 
-import org.elasticsearch.action.ActionListener;
+import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 
 /**
  * This interface only extends the interface {@link org.elasticsearch.action.ActionListener}.
@@ -13,12 +13,24 @@ import org.elasticsearch.action.ActionListener;
  * listener will be used, for instance, {@link DefaultIndexResponseListener}.
  * <p/>
  * Note that implementation of this interface MUST be thread-safe.
- * <p/>
- * TODO Isolate listener exception.
  * 
  * @author sunhe
  * @date Mar 19, 2016
  */
-public interface ResponseListener<Response> extends ActionListener<Response> {
-
+public interface ResponseListener<Response> {
+	
+	/**
+	 * @param response
+	 * @author sunhe
+	 * @date Apr 17, 2016
+	 */
+	void onResponse(Response response);
+	
+	/**
+	 * @param event
+	 * @author sunhe
+	 * @date Apr 17, 2016
+	 */
+    void onFailure(ExceptionEvent event);
+	
 }

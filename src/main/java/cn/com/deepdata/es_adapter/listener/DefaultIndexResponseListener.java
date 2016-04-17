@@ -2,6 +2,8 @@ package cn.com.deepdata.es_adapter.listener;
 
 import org.elasticsearch.action.index.IndexResponse;
 
+import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+
 /**
  * Default index response listener that will log the response somewhere.
  * <p/>
@@ -16,14 +18,12 @@ public class DefaultIndexResponseListener implements ResponseListener<IndexRespo
 
 	@Override
 	public void onResponse(IndexResponse response) {
-		// TODO Auto-generated method stub
-		
+		// do nothing
 	}
 
 	@Override
-	public void onFailure(Throwable e) {
-		// TODO Auto-generated method stub
-		
+	public void onFailure(ExceptionEvent event) {
+		event.getCause().printStackTrace();
 	}
 	
 }
