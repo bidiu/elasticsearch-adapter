@@ -341,7 +341,6 @@ public class Pipeline implements Closeable {
 	 * @author sunhe
 	 * @date Apr 15, 2016
 	 */
-	@SuppressWarnings("resource")
 	public static Pipeline build(
 			PipelineSettings settings, 
 			AdapterChainInitializer adapterChainInitializer, 
