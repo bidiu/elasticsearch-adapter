@@ -14,7 +14,7 @@ import cn.com.deepdata.es_adapter.adapter.AdapterChain;
  * @author sunhe
  * @date 2016年3月18日
  */
-public abstract class BoundTask implements Runnable {
+public abstract class AbstractPipelineTask implements Runnable {
 	
 	protected PipelineContext pipelineCtx;
 	
@@ -32,7 +32,7 @@ public abstract class BoundTask implements Runnable {
 	
 	protected String type;
 	
-	public BoundTask(PipelineContext pipelineCtx) {
+	public AbstractPipelineTask(PipelineContext pipelineCtx) {
 		this.pipelineCtx = pipelineCtx;
 		settings = pipelineCtx.getSettings();
 		client = pipelineCtx.getClient();

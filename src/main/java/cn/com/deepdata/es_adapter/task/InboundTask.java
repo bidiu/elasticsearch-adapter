@@ -17,7 +17,7 @@ import cn.com.deepdata.es_adapter.listener.ResponseListener;
  * @author sunhe
  * @date 2016年3月18日
  */
-public class InboundTask extends BoundTask {
+public class InboundTask extends AbstractPipelineTask {
 	
 	public InboundTask(PipelineContext pipelineCtx) {
 		super(pipelineCtx);

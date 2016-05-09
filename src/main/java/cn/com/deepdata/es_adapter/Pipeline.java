@@ -37,6 +37,7 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * TODO refine Javadoc <br/>
  * TODO aggregation/delimiter apdater <br/>
  * TODO bulk mode <br/>
+ * TODO outbound mode <br/>
  * 
  * @author sunhe
  * @date 2016年3月18日
