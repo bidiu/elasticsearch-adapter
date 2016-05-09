@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Adapter that adapts JSON in either String, byte array, or Java Object 
  * format to Java Map.
  * <p/>
- * If the given JSON is an array, then the resulting type is List, otherwise 
- * it's Map.
+ * If the given JSON is an array, then the resulting type is List<Object>, 
+ * otherwise it's Map<String, Object>.
  * <p/>
  * If exception occurs while trying to adapt the data, the exception will be 
  * propagated along the adapter chain.
