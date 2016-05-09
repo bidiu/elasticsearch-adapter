@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Json2MapAdapter extends AbstractAdapter {
 	
-	private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
+	protected static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
 	
-	private ObjectMapper objectMapper;
+	protected ObjectMapper objectMapper;
 	
 	public Json2MapAdapter() {
 		this(DEFAULT_OBJECT_MAPPER);
@@ -39,7 +39,16 @@ public class Json2MapAdapter extends AbstractAdapter {
 		this.objectMapper = objectMapper;
 	}
 	
-	private Object adapt(Object data) throws Exception {
+	/**
+	 * Adapt Java Object to Java Map.
+	 * 
+	 * @param data
+	 * @return
+	 * @throws Exception
+	 * @author sunhe
+	 * @date 2016年5月9日
+	 */
+	protected Object adapt(Object data) throws Exception {
 		if (data instanceof byte[]) {
 			return objectMapper.readValue((byte[]) data, Object.class);
 		}
