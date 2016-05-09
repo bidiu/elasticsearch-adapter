@@ -1,6 +1,7 @@
 package cn.com.deepdata.es_adapter;
 
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -353,7 +354,8 @@ public class Pipeline implements Closeable {
 		Pipeline pipeline = new Pipeline();
 		
 		// pipeline context related ..
-		AdapterChain adapterChain = new AdapterChain(settings.isInbound());
+		BlockingQueue<Object> dataQueue = new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity());
+		AdapterChain adapterChain = new AdapterChain(settings.isInbound(), dataQueue);
 		if (adapterChainInitializer != null) {
 			adapterChainInitializer.initialize(adapterChain);
 		}
@@ -374,8 +376,7 @@ public class Pipeline implements Closeable {
 					.addTransportAddress(new InetSocketTransportAddress(settings.getHost(), settings.getPort()));
 		}
 		PipelineContext pipelineCtx = new PipelineContext(settings, client, 
-				new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity()), adapterChain, 
-				pipeline, responseListener);
+				dataQueue, adapterChain, pipeline, responseListener);
 		pipeline.setPipelineCtx(pipelineCtx);
 		
 		// thread pool related ..

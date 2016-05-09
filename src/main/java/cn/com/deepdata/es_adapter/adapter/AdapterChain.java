@@ -1,9 +1,11 @@
 package cn.com.deepdata.es_adapter.adapter;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * The adapter chain composed of several adapters and its meta data.
@@ -20,15 +22,18 @@ public class AdapterChain {
 	private Adapter firstAdapter;
 	
 	private List<AdapterContext> adapterCtxList;
-
-	public synchronized boolean isInbound() {
-		return isInbound;
-	}
 	
-	public AdapterChain(boolean isInbound) {
+	private BlockingQueue<Object> dataQueue;
+
+	public AdapterChain(boolean isInbound, BlockingQueue<Object> dataQueue) {
 		this.isInbound = isInbound;
 		firstAdapter = null;
 		adapterCtxList = new LinkedList<AdapterContext>();
+		this.dataQueue = dataQueue;
+	}
+	
+	public synchronized boolean isInbound() {
+		return isInbound;
 	}
 	
 	/**
@@ -53,24 +58,37 @@ public class AdapterChain {
 	 * @date 2016年4月5日
 	 */
 	public synchronized AdapterChain addLast(Adapter adapter, Map<String, Object> msg) {
-		AdapterContext adapterCtx = new AdapterContext();
-		adapterCtx.setMsg(msg);
-		
-		if (adapterCtxList.size() == 0) {
-			firstAdapter = adapter;
+		try {
+			// prepare adapter's dataQueue property
+			if (adapter instanceof AbstractAdapter) {
+				AbstractAdapter abstractAdapter = (AbstractAdapter) adapter;
+				Field field = abstractAdapter.getClass().getDeclaredField("dataQueue");
+				field.setAccessible(true);
+				field.set(abstractAdapter, dataQueue);
+			}
+			
+			AdapterContext adapterCtx = new AdapterContext();
+			adapterCtx.setMsg(msg);
+			
+			if (adapterCtxList.size() == 0) {
+				firstAdapter = adapter;
+			}
+			else if (adapterCtxList.size() > 0) {
+				// link current rear adapter context to current added one
+				AdapterContext lastAdapterCtx = adapterCtxList.get(adapterCtxList.size() - 1);
+				lastAdapterCtx.setNextAdapterCtx(adapterCtx);
+				lastAdapterCtx.setNextAdapter(adapter);
+			}
+			
+			adapterCtx.setAdapterChain(this);
+			adapterCtx.setNextAdapterCtx(null);
+			adapterCtx.setNextAdapter(null);
+			adapterCtxList.add(adapterCtx);
+			return this;
 		}
-		else if (adapterCtxList.size() > 0) {
-			// link current rear adapter context to current added one
-			AdapterContext lastAdapterCtx = adapterCtxList.get(adapterCtxList.size() - 1);
-			lastAdapterCtx.setNextAdapterCtx(adapterCtx);
-			lastAdapterCtx.setNextAdapter(adapter);
+		catch (ReflectiveOperationException e) {
+			throw new IllegalStateException(e);
 		}
-		
-		adapterCtx.setAdapterChain(this);
-		adapterCtx.setNextAdapterCtx(null);
-		adapterCtx.setNextAdapter(null);
-		adapterCtxList.add(adapterCtx);
-		return this;
 	}
 	
 	/**

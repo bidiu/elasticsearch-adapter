@@ -1,6 +1,7 @@
 package cn.com.deepdata.es_adapter.adapter;
 
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 
@@ -16,6 +17,17 @@ import cn.com.deepdata.es_adapter.common.ExceptionEvent;
  * @date 2016年3月18日
  */
 public abstract class AbstractAdapter implements Adapter {
+	
+	private BlockingQueue<Object> dataQueue;
+	
+	protected BlockingQueue<Object> getDataQueue() {
+		if (dataQueue == null) {
+			throw new IllegalStateException("You have to register this adapter to an adpter chain first");
+		}
+		else {
+			return dataQueue;
+		}
+	}
 	
 	@Override
 	public final Object inboundAdapt(AdapterContext ctx, Object data) throws Exception {
