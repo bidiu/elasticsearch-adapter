@@ -27,6 +27,10 @@ public class DataWrapper {
 	public synchronized Object getData() {
 		return data;
 	}
+	
+	public synchronized void setData(Object data) {
+		this.data = data;
+	}
 
 	public synchronized Class<?> getFirstAdapterClazz() {
 		return firstAdapterClazz;

@@ -9,6 +9,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
+import cn.com.deepdata.es_adapter.adapter.AdapterChain;
+import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
+import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 
 @SuppressWarnings("unused")
 public class PipelineTest {
@@ -40,6 +43,27 @@ public class PipelineTest {
 		
 		System.out.println("********************************");
 		System.out.println((end - start) / 1000 + "s");
+	}
+	
+	@Ignore
+	@Test
+	public void newPipelineTest() throws InterruptedException {
+		PipelineSettings settings = PipelineSettings.builder()
+				.index("new-pipeline-test")
+				.type("type")
+				.build();
+		Pipeline pipeline = Pipeline.build(settings, new AdapterChainInitializer() {
+			
+			@Override
+			public void initialize(AdapterChain adapterChain) {
+				Map<String, String> attrNameMap = new HashMap<String, String>();
+				attrNameMap.put("title", "book name");
+				adapterChain.addLast(new SimpleAttrNameAdapter(attrNameMap));
+			}
+			
+		});
+		pipeline.putData(getDoc());
+		pipeline.close();
 	}
 
 }

@@ -10,6 +10,7 @@ import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
 import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
+import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * Runnable task for inbound mode.
@@ -27,14 +28,19 @@ public class InboundTask extends AbstractPipelineTask {
 	@Override
 	public void run() {
 		try {
+			DataWrapper dataWrapper = null;
 			Object data = null;
 			IndexRequestBuilder indexRequestBuilder = null;
 			IndexResponse indexResponse = null;
 			
-			while ((data = dataQueue.take()) != dataQueuePoisonObj) {
+			// take data from queue
+			dataWrapper = dataQueue.take();
+			data = dataWrapper.getData();
+			while (data != dataQueuePoisonObj) {
 				try {
 					// adapt data to JSON format
-					data = adapterChain.fireAdapters(data);
+					dataWrapper = adapterChain.fireAdapters(dataWrapper);
+					data = dataWrapper.getData();
 					
 					// build index request
 					if (data instanceof Map<?, ?>) {
@@ -65,12 +71,16 @@ public class InboundTask extends AbstractPipelineTask {
 				catch (Exception e) {
 					try {
 						((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener())
-								.onFailure(new ExceptionEvent(e, data));
+								.onFailure(new ExceptionEvent(e, dataWrapper));
 					}
 					catch (RuntimeException runtimeE) {
 						runtimeE.printStackTrace();
 					}
 				}
+				
+				// take data from queue for next loop
+				dataWrapper = dataQueue.take();
+				data = dataWrapper.getData();
 			}
 		}
 		catch (InterruptedException e) {
@@ -78,7 +88,7 @@ public class InboundTask extends AbstractPipelineTask {
 		}
 		finally {
 			// tell other threads to exit
-			dataQueue.add(dataQueuePoisonObj);
+			dataQueue.add(new DataWrapper(dataQueuePoisonObj));
 		}
 	}
 	

@@ -20,6 +20,7 @@ import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
 import cn.com.deepdata.es_adapter.common.Closeable;
 import cn.com.deepdata.es_adapter.listener.DefaultIndexResponseListener;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
+import cn.com.deepdata.es_adapter.model.DataWrapper;
 import cn.com.deepdata.es_adapter.task.InboundTask;
 
 /**
@@ -354,7 +355,7 @@ public class Pipeline implements Closeable {
 		Pipeline pipeline = new Pipeline();
 		
 		// pipeline context related ..
-		BlockingQueue<Object> dataQueue = new LinkedBlockingQueue<Object>(settings.getDataQueueCapacity());
+		BlockingQueue<DataWrapper> dataQueue = new LinkedBlockingQueue<DataWrapper>(settings.getDataQueueCapacity());
 		AdapterChain adapterChain = new AdapterChain(settings.isInbound(), dataQueue);
 		if (adapterChainInitializer != null) {
 			adapterChainInitializer.initialize(adapterChain);
@@ -458,7 +459,7 @@ public class Pipeline implements Closeable {
 		}
 		
 		if (pipelineCtx.getSettings().isInbound()) {
-			pipelineCtx.getDataQueue().put(data);
+			pipelineCtx.getDataQueue().put(new DataWrapper(data));
 		}
 		else {
 			throw new IllegalStateException("Not allowed to take data from queue when in inbound mode.");
@@ -493,7 +494,7 @@ public class Pipeline implements Closeable {
 			throw new IllegalStateException("Not allowed to put data to queue when in outbound mode.");
 		}
 		else {
-			return pipelineCtx.getDataQueue().take();
+			return pipelineCtx.getDataQueue().take().getData();
 		}
 	}
 	
@@ -520,7 +521,7 @@ public class Pipeline implements Closeable {
 		boolean isInterrupted = false;
 		while (! executorService.isTerminated()) {
 			try {
-				pipelineCtx.getDataQueue().put(pipelineCtx.getDataQueuePoisonObj());
+				pipelineCtx.getDataQueue().put(new DataWrapper(pipelineCtx.getDataQueuePoisonObj()));
 				executorService.shutdown();
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 			}

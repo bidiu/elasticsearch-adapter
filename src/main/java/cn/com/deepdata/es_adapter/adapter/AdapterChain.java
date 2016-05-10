@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import cn.com.deepdata.es_adapter.model.DataWrapper;
+
 /**
  * The adapter chain composed of several adapters and its meta data.
  * <p/>
@@ -23,9 +25,9 @@ public class AdapterChain {
 	
 	private List<AdapterContext> adapterCtxList;
 	
-	private BlockingQueue<Object> dataQueue;
+	private BlockingQueue<DataWrapper> dataQueue;
 
-	public AdapterChain(boolean isInbound, BlockingQueue<Object> dataQueue) {
+	public AdapterChain(boolean isInbound, BlockingQueue<DataWrapper> dataQueue) {
 		this.isInbound = isInbound;
 		firstAdapter = null;
 		adapterCtxList = new LinkedList<AdapterContext>();
@@ -61,10 +63,13 @@ public class AdapterChain {
 		try {
 			// prepare adapter's dataQueue property
 			if (adapter instanceof AbstractAdapter) {
-				AbstractAdapter abstractAdapter = (AbstractAdapter) adapter;
-				Field field = abstractAdapter.getClass().getDeclaredField("dataQueue");
+				Class<?> clazz = adapter.getClass();
+				while (clazz != AbstractAdapter.class) {
+					clazz = clazz.getSuperclass();
+				}
+				Field field = clazz.getDeclaredField("dataQueue");
 				field.setAccessible(true);
-				field.set(abstractAdapter, dataQueue);
+				field.set(adapter, dataQueue);
 			}
 			
 			AdapterContext adapterCtx = new AdapterContext();
@@ -95,7 +100,7 @@ public class AdapterChain {
 	 * Fire the first adapter in the chain, all following adapters
 	 * on this chain will be fired sequentially one by one.
 	 * 
-	 * @param data
+	 * @param dataWrapper
 	 * 		data to be processed
 	 * @return
 	 * 		the resulting data
@@ -103,16 +108,16 @@ public class AdapterChain {
 	 * @throws Exception 
 	 * @date 2016年3月18日
 	 */
-	public Object fireAdapters(Object data) throws Exception {
+	public DataWrapper fireAdapters(DataWrapper dataWrapper) throws Exception {
 		if (firstAdapter == null) {
 			// not any adapter available on the chain
-			return data;
+			return dataWrapper;
 		}
 		else if (isInbound) {
-			return firstAdapter.inboundAdapt(adapterCtxList.get(0), data);
+			return firstAdapter.inboundAdapt(adapterCtxList.get(0), dataWrapper);
 		}
 		else {
-			return firstAdapter.outboundAdapt(adapterCtxList.get(0), data);
+			return firstAdapter.outboundAdapt(adapterCtxList.get(0), dataWrapper);
 		}
 	}
 	

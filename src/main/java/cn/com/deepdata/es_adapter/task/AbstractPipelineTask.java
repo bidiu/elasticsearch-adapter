@@ -7,6 +7,7 @@ import org.elasticsearch.client.Client;
 import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
+import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * The abstract class of {@link InboundTask} and {@link OutboundTask}.
@@ -22,7 +23,7 @@ public abstract class AbstractPipelineTask implements Runnable {
 	
 	protected Client client;
 	
-	protected BlockingQueue<Object> dataQueue;
+	protected BlockingQueue<DataWrapper> dataQueue;
 	
 	protected AdapterChain adapterChain;
 	

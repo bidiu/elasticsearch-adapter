@@ -8,6 +8,7 @@ import org.elasticsearch.client.Client;
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
+import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * This class is {@link Pipeline pipeline} context.
@@ -23,7 +24,7 @@ public class PipelineContext {
 	
 	private Client client;
 	
-	private BlockingQueue<Object> dataQueue;
+	private BlockingQueue<DataWrapper> dataQueue;
 	
 	private AdapterChain adapterChain;
 	
@@ -34,7 +35,7 @@ public class PipelineContext {
 	private Object dataQueuePoisonObj;
 	
 	public PipelineContext(PipelineSettings settings, Client client, 
-			BlockingQueue<Object> dataQueue, AdapterChain adapterChain, 
+			BlockingQueue<DataWrapper> dataQueue, AdapterChain adapterChain, 
 			Pipeline pipeline, ResponseListener<? extends ActionResponse> responseListener) {
 		this.settings = settings;
 		this.client = client;
@@ -54,7 +55,7 @@ public class PipelineContext {
 	public Client getClient() {
 		return client;
 	}
-	public BlockingQueue<Object> getDataQueue() {
+	public BlockingQueue<DataWrapper> getDataQueue() {
 		return dataQueue;
 	}
 	public AdapterChain getAdapterChain() {

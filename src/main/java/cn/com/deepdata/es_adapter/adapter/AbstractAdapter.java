@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * Abstract adapter class for extension. It's highly recommended to only 
@@ -18,9 +19,9 @@ import cn.com.deepdata.es_adapter.common.ExceptionEvent;
  */
 public abstract class AbstractAdapter implements Adapter {
 	
-	private BlockingQueue<Object> dataQueue;
+	private BlockingQueue<DataWrapper> dataQueue;
 	
-	protected BlockingQueue<Object> getDataQueue() {
+	protected BlockingQueue<DataWrapper> getDataQueue() {
 		if (dataQueue == null) {
 			throw new IllegalStateException("You have to register this adapter to an adpter chain first");
 		}
@@ -30,14 +31,19 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	@Override
-	public final Object inboundAdapt(AdapterContext ctx, Object data) throws Exception {
+	public final DataWrapper inboundAdapt(AdapterContext ctx, DataWrapper dataWrapper) throws Exception {
 		try {
-			data = inboundAdapt(data, ctx.getMsg());
+			Class<?> clazz = dataWrapper.getFirstAdapterClazz();
+			if (clazz == null || clazz == this.getClass()) {
+				dataWrapper.setFirstAdapterClazz(null);
+				Object adaptedData = inboundAdapt(dataWrapper.getData(), ctx.getMsg());
+				dataWrapper.setData(adaptedData);
+			}
 		}
 		catch (Exception e) {
-			data = onException(ctx, new ExceptionEvent(e, data));
+			dataWrapper = onException(ctx, new ExceptionEvent(e, dataWrapper));
 		}
-		return ctx.fireNextAdapter(data);
+		return ctx.fireNextAdapter(dataWrapper);
 	}
 	
 	/**
@@ -54,14 +60,19 @@ public abstract class AbstractAdapter implements Adapter {
 	public abstract Object inboundAdapt(Object data, Map<String, Object> msg) throws Exception;
 	
 	@Override
-	public final Object outboundAdapt(AdapterContext ctx, Object data) throws Exception {
+	public final DataWrapper outboundAdapt(AdapterContext ctx, DataWrapper dataWrapper) throws Exception {
 		try {
-			data = outboundAdapt(data, ctx.getMsg());
+			Class<?> clazz = dataWrapper.getFirstAdapterClazz();
+			if (clazz == null || clazz == this.getClass()) {
+				dataWrapper.setFirstAdapterClazz(null);
+				Object adaptedData = outboundAdapt(dataWrapper.getData(), ctx.getMsg());
+				dataWrapper.setData(adaptedData);
+			}
 		}
 		catch (Exception e) {
-			data = onException(ctx, new ExceptionEvent(e, data));
+			dataWrapper = onException(ctx, new ExceptionEvent(e, dataWrapper));
 		}
-		return ctx.fireNextAdapter(data);
+		return ctx.fireNextAdapter(dataWrapper);
 	}
 	
 	/**
@@ -78,11 +89,11 @@ public abstract class AbstractAdapter implements Adapter {
 	public abstract Object outboundAdapt(Object data, Map<String, Object> msg) throws Exception;
 	
 	@Override
-	public final Object onException(AdapterContext ctx, ExceptionEvent event) throws Exception {
-		Object result = ctx.isInbound() ? onInboundException(event) : onOutboundException(event);
+	public final DataWrapper onException(AdapterContext ctx, ExceptionEvent event) throws Exception {
+		Object adaptedData = ctx.isInbound() ? onInboundException(event) : onOutboundException(event);
 		
-		if (result instanceof ExceptionEvent) {
-			event = (ExceptionEvent) result;
+		if (adaptedData instanceof ExceptionEvent) {
+			event = (ExceptionEvent) adaptedData;
 			if (event.shouldPropagate()) {
 				return ctx.fireNextException(event);
 			}
@@ -92,7 +103,9 @@ public abstract class AbstractAdapter implements Adapter {
 		}
 		else {
 			// recover from exception successfully
-			return result;
+			DataWrapper dataWrapper = event.getDataWrapper();
+			dataWrapper.setData(adaptedData);
+			return dataWrapper;
 		}
 	}
 	
