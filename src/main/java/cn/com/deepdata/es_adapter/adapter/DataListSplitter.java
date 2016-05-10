@@ -10,11 +10,14 @@ public class DataListSplitter<T> extends AbstractAdapter {
 	
 	protected void split(List<T> list, AdapterContext ctx) {
 		for (T ele : list) {
-			try {
-				getDataQueue().put(new DataWrapper(ele, ctx.getNextAdapterClazz()));
-			}
-			catch (InterruptedException e) {
-				// swallow
+			while (true) {
+				try {
+					getDataQueue().put(new DataWrapper(ele, ctx.getNextAdapterClazz()));
+					break;
+				}
+				catch (InterruptedException e) {
+					// swallow
+				}
 			}
 		}
 	}
