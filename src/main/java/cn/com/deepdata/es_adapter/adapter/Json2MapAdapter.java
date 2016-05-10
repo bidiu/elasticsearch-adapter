@@ -49,7 +49,10 @@ public class Json2MapAdapter extends AbstractAdapter {
 	 * @date 2016年5月9日
 	 */
 	protected Object adapt(Object data) throws Exception {
-		if (data instanceof byte[]) {
+		if (data instanceof Map) {
+			return data;
+		}
+		else if (data instanceof byte[]) {
 			return objectMapper.readValue((byte[]) data, Object.class);
 		}
 		else if (data instanceof String) {
