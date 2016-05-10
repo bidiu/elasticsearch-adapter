@@ -2,7 +2,7 @@ package cn.com.deepdata.es_adapter.listener;
 
 import org.elasticsearch.action.index.IndexResponse;
 
-import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+import cn.com.deepdata.es_adapter.ExceptionEvent;
 
 /**
  * Default index response listener that will log the response somewhere.

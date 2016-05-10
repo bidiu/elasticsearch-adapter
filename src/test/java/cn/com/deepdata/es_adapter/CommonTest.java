@@ -17,7 +17,6 @@ import cn.com.deepdata.es_adapter.adapter.Adapter;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
 import cn.com.deepdata.es_adapter.adapter.AdapterContext;
-import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 @SuppressWarnings("unused")

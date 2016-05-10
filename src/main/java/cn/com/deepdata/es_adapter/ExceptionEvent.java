@@ -1,4 +1,4 @@
-package cn.com.deepdata.es_adapter.common;
+package cn.com.deepdata.es_adapter;
 
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 

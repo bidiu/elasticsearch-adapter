@@ -6,9 +6,9 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
-import cn.com.deepdata.es_adapter.common.ExceptionEvent;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 

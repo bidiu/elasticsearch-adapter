@@ -1,6 +1,6 @@
 package cn.com.deepdata.es_adapter.listener;
 
-import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+import cn.com.deepdata.es_adapter.ExceptionEvent;
 
 /**
  * This interface only extends the interface {@link org.elasticsearch.action.ActionListener}.

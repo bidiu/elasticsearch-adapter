@@ -3,7 +3,7 @@ package cn.com.deepdata.es_adapter.adapter;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import cn.com.deepdata.es_adapter.common.ExceptionEvent;
+import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
