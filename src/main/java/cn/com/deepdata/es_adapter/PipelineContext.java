@@ -34,6 +34,8 @@ public class PipelineContext {
 	
 	private Object dataQueuePoisonObj;
 	
+	private Object realDataQueuePoisonObj;
+	
 	public PipelineContext(PipelineSettings settings, Client client, 
 			BlockingQueue<DataWrapper> dataQueue, AdapterChain adapterChain, 
 			Pipeline pipeline, ResponseListener<? extends ActionResponse> responseListener) {
@@ -44,10 +46,11 @@ public class PipelineContext {
 		this.pipeline = pipeline;
 		this.responseListener = responseListener;
 		dataQueuePoisonObj = new Object();
+		realDataQueuePoisonObj = new Object();
 	}
 	
 	/*
-	 * Getters ..
+	 * getters ..
 	 */
 	public PipelineSettings getSettings() {
 		return settings;
@@ -66,6 +69,9 @@ public class PipelineContext {
 	}
 	public Object getDataQueuePoisonObj() {
 		return dataQueuePoisonObj;
+	}
+	public Object getRealDataQueuePoisonObj() {
+		return realDataQueuePoisonObj;
 	}
 	public ResponseListener<? extends ActionResponse> getResponseListener() {
 		return responseListener;

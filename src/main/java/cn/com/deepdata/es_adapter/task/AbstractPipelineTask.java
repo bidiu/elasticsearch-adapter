@@ -29,6 +29,8 @@ public abstract class AbstractPipelineTask implements Runnable {
 	
 	protected Object dataQueuePoisonObj;
 	
+	protected Object realDataQueuePoisonObj;
+	
 	protected String index;
 	
 	protected String type;
@@ -40,6 +42,7 @@ public abstract class AbstractPipelineTask implements Runnable {
 		dataQueue = pipelineCtx.getDataQueue();
 		adapterChain = pipelineCtx.getAdapterChain();
 		dataQueuePoisonObj = pipelineCtx.getDataQueuePoisonObj();
+		realDataQueuePoisonObj = pipelineCtx.getRealDataQueuePoisonObj();
 		index = settings.getIndex();
 		type = settings.getType();
 	}

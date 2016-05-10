@@ -39,7 +39,7 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * 
  * TODO more advanced listener <br/>
  * TODO refine Javadoc <br/>
- * TODO aggregation/delimiter(poison pill related bug) apdater <br/>
+ * TODO aggregation/delimiter apdater <br/>
  * TODO bulk mode <br/>
  * TODO outbound mode <br/>
  * TODO adapter bundle <br/>

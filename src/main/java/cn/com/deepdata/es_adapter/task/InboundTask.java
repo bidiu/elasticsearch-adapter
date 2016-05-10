@@ -1,6 +1,7 @@
 package cn.com.deepdata.es_adapter.task;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
@@ -21,8 +22,38 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
  */
 public class InboundTask extends AbstractPipelineTask {
 	
+	/**
+	 * TODO more elegant, or configurable <br/>
+	 * 60 seconds
+	 */
+	private static final int DATA_TAKING_TIMEOUT = 60;
+	
+	private boolean hasPoisonObjReceived = false;
+	
 	public InboundTask(PipelineContext pipelineCtx) {
 		super(pipelineCtx);
+	}
+	
+	private DataWrapper takeDataWrapperFromQueue() throws InterruptedException {
+		DataWrapper dataWrapper = null;
+		
+		if (hasPoisonObjReceived) {
+			dataWrapper = dataQueue.poll(DATA_TAKING_TIMEOUT, TimeUnit.SECONDS);
+		}
+		else {
+			dataWrapper = dataQueue.take();
+			if (dataWrapper.getData() == dataQueuePoisonObj) {
+				hasPoisonObjReceived = true;
+				dataWrapper = dataQueue.poll(DATA_TAKING_TIMEOUT, TimeUnit.SECONDS);
+			}
+		}
+		
+		if (dataWrapper != null && dataWrapper.getData() == realDataQueuePoisonObj) {
+			return null;
+		}
+		else {
+			return dataWrapper;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -34,10 +65,7 @@ public class InboundTask extends AbstractPipelineTask {
 			IndexRequestBuilder indexRequestBuilder = null;
 			IndexResponse indexResponse = null;
 			
-			// take data from queue
-			dataWrapper = dataQueue.take();
-			data = dataWrapper.getData();
-			while (data != dataQueuePoisonObj) {
+			while ((dataWrapper = takeDataWrapperFromQueue()) != null) {
 				try {
 					// adapt data to JSON format
 					dataWrapper = adapterChain.fireAdapters(dataWrapper);
@@ -81,10 +109,6 @@ public class InboundTask extends AbstractPipelineTask {
 						runtimeE.printStackTrace();
 					}
 				}
-				
-				// take data from queue for next loop
-				dataWrapper = dataQueue.take();
-				data = dataWrapper.getData();
 			}
 		}
 		catch (InterruptedException e) {
@@ -92,7 +116,7 @@ public class InboundTask extends AbstractPipelineTask {
 		}
 		finally {
 			// tell other threads to exit
-			dataQueue.add(new DataWrapper(dataQueuePoisonObj));
+			dataQueue.add(new DataWrapper(realDataQueuePoisonObj));
 		}
 	}
 	

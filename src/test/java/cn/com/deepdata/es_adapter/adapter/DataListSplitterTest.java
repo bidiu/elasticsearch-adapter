@@ -23,7 +23,6 @@ public class DataListSplitterTest {
 		return doc;
 	}
 	
-	@Ignore
 	@Test
 	public void test() throws InterruptedException {
 		PipelineSettings settings = PipelineSettings.builder()
