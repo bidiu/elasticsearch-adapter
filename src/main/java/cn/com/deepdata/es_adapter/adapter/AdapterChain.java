@@ -34,6 +34,22 @@ public class AdapterChain {
 		this.dataQueue = dataQueue;
 	}
 	
+	/**
+	 * This is an utility function.
+	 * <p/>
+	 * Note that this function is only capable of setting the declared fields, 
+	 * as opposed to the inherited fields.
+	 * 
+	 * @author sunhe
+	 * @date 2016年5月10日
+	 */
+	private static void setPrivateFieldByReflection(Object obj, String fieldName, Object value) throws ReflectiveOperationException {
+		Class<?> clazz = obj.getClass();
+		Field field = clazz.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(obj, value);
+	}
+	
 	public synchronized boolean isInbound() {
 		return isInbound;
 	}
@@ -73,7 +89,7 @@ public class AdapterChain {
 			}
 			
 			AdapterContext adapterCtx = new AdapterContext();
-			adapterCtx.setMsg(msg);
+			setPrivateFieldByReflection(adapterCtx, "msg", msg);
 			
 			if (adapterCtxList.size() == 0) {
 				firstAdapter = adapter;
@@ -81,13 +97,13 @@ public class AdapterChain {
 			else if (adapterCtxList.size() > 0) {
 				// link current rear adapter context to current added one
 				AdapterContext lastAdapterCtx = adapterCtxList.get(adapterCtxList.size() - 1);
-				lastAdapterCtx.setNextAdapterCtx(adapterCtx);
-				lastAdapterCtx.setNextAdapter(adapter);
+				setPrivateFieldByReflection(lastAdapterCtx, "nextAdapterCtx", adapterCtx);
+				setPrivateFieldByReflection(lastAdapterCtx, "nextAdapter", adapter);
 			}
 			
-			adapterCtx.setAdapterChain(this);
-			adapterCtx.setNextAdapterCtx(null);
-			adapterCtx.setNextAdapter(null);
+			setPrivateFieldByReflection(adapterCtx, "adapterChain", this);
+			setPrivateFieldByReflection(adapterCtx, "nextAdapterCtx", null);
+			setPrivateFieldByReflection(adapterCtx, "nextAdapter", null);
 			adapterCtxList.add(adapterCtx);
 			return this;
 		}

@@ -8,6 +8,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.PipelineContext;
+import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
@@ -67,6 +68,9 @@ public class InboundTask extends AbstractPipelineTask {
 					// fire index request
 					indexResponse = indexRequestBuilder.execute().actionGet();
 					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onResponse(indexResponse);
+				}
+				catch (SkipAdaptingException e) {
+					// swallow
 				}
 				catch (Exception e) {
 					try {

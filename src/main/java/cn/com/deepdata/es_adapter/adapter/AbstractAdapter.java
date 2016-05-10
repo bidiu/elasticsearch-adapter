@@ -1,6 +1,5 @@
 package cn.com.deepdata.es_adapter.adapter;
 
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import cn.com.deepdata.es_adapter.ExceptionEvent;
@@ -36,7 +35,7 @@ public abstract class AbstractAdapter implements Adapter {
 			Class<?> clazz = dataWrapper.getFirstAdapterClazz();
 			if (clazz == null || clazz == this.getClass()) {
 				dataWrapper.setFirstAdapterClazz(null);
-				Object adaptedData = inboundAdapt(dataWrapper.getData(), ctx.getMsg());
+				Object adaptedData = inboundAdapt(dataWrapper.getData(), ctx);
 				dataWrapper.setData(adaptedData);
 			}
 		}
@@ -57,7 +56,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @author sunhe
 	 * @date 2016年4月5日
 	 */
-	public abstract Object inboundAdapt(Object data, Map<String, Object> msg) throws Exception;
+	public abstract Object inboundAdapt(Object data, AdapterContext ctx) throws Exception;
 	
 	@Override
 	public final DataWrapper outboundAdapt(AdapterContext ctx, DataWrapper dataWrapper) throws Exception {
@@ -65,7 +64,7 @@ public abstract class AbstractAdapter implements Adapter {
 			Class<?> clazz = dataWrapper.getFirstAdapterClazz();
 			if (clazz == null || clazz == this.getClass()) {
 				dataWrapper.setFirstAdapterClazz(null);
-				Object adaptedData = outboundAdapt(dataWrapper.getData(), ctx.getMsg());
+				Object adaptedData = outboundAdapt(dataWrapper.getData(), ctx);
 				dataWrapper.setData(adaptedData);
 			}
 		}
@@ -86,7 +85,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @author sunhe
 	 * @date 2016年4月5日
 	 */
-	public abstract Object outboundAdapt(Object data, Map<String, Object> msg) throws Exception;
+	public abstract Object outboundAdapt(Object data, AdapterContext ctx) throws Exception;
 	
 	@Override
 	public final DataWrapper onException(AdapterContext ctx, ExceptionEvent event) throws Exception {

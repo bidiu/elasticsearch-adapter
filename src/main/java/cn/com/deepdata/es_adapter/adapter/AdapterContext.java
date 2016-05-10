@@ -26,28 +26,25 @@ public class AdapterContext {
 	public synchronized boolean isInbound() {
 		return adapterChain.isInbound();
 	}
-
-	public synchronized void setAdapterChain(AdapterChain adapterChain) {
-		this.adapterChain = adapterChain;
-	}
-
-	public synchronized void setNextAdapter(Adapter nextAdapter) {
-		this.nextAdapter = nextAdapter;
-	}
-
-	public synchronized void setNextAdapterCtx(AdapterContext nextAdapterCtx) {
-		this.nextAdapterCtx = nextAdapterCtx;
-	}
 	
 	public synchronized Map<String, Object> getMsg() {
 		return msg;
 	}
-
-	public synchronized void setMsg(Map<String, Object> msg) {
-		this.msg = msg;
+	
+	public synchronized Class<?> getNextAdapterClazz() {
+		return nextAdapter.getClass();
 	}
 
-	public DataWrapper fireNextAdapter(DataWrapper dataWrapper) throws Exception {
+	/**
+	 * Specific adapters CANNOT call this method.
+	 * 
+	 * @param dataWrapper
+	 * @return
+	 * @throws Exception
+	 * @author sunhe
+	 * @date 2016年5月10日
+	 */
+	DataWrapper fireNextAdapter(DataWrapper dataWrapper) throws Exception {
 		if (nextAdapter != null) {
 			if (adapterChain.isInbound()) {
 				return nextAdapter.inboundAdapt(nextAdapterCtx, dataWrapper);
@@ -62,7 +59,16 @@ public class AdapterContext {
 		}
 	}
 	
-	public DataWrapper fireNextException(ExceptionEvent event) throws Exception {
+	/**
+	 * Specific adapters CANNOT call this method.
+	 * 
+	 * @param event
+	 * @return
+	 * @throws Exception
+	 * @author sunhe
+	 * @date 2016年5月10日
+	 */
+	DataWrapper fireNextException(ExceptionEvent event) throws Exception {
 		if (nextAdapter != null) {
 			return nextAdapter.onException(nextAdapterCtx, event);
 		}

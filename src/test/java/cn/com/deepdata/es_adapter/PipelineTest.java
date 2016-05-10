@@ -49,7 +49,7 @@ public class PipelineTest {
 	@Test
 	public void newPipelineTest() throws InterruptedException {
 		PipelineSettings settings = PipelineSettings.builder()
-				.index("new-pipeline-test")
+				.index("new-pipeline-test2")
 				.type("type")
 				.build();
 		Pipeline pipeline = Pipeline.build(settings, new AdapterChainInitializer() {

@@ -112,12 +112,12 @@ public class SimpleAttrNameAdapter extends Json2MapAdapter {
 	}
 	
 	@Override
-	public Object inboundAdapt(Object data, Map<String, Object> msg) throws Exception {
+	public Object inboundAdapt(Object data, AdapterContext ctx) throws Exception {
 		return adapt(data);
 	}
 	
 	@Override
-	public Object outboundAdapt(Object data, Map<String, Object> msg) throws Exception {
+	public Object outboundAdapt(Object data, AdapterContext ctx) throws Exception {
 		return adapt(data);
 	}
 	
