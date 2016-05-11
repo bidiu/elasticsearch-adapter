@@ -22,12 +22,6 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
  */
 public class InboundTask extends AbstractPipelineTask {
 	
-	/**
-	 * TODO more elegant, or configurable <br/>
-	 * 60 seconds
-	 */
-	private static final int DATA_TAKING_TIMEOUT = 60;
-	
 	private boolean hasPoisonObjReceived = false;
 	
 	public InboundTask(PipelineContext pipelineCtx) {
@@ -38,13 +32,13 @@ public class InboundTask extends AbstractPipelineTask {
 		DataWrapper dataWrapper = null;
 		
 		if (hasPoisonObjReceived) {
-			dataWrapper = dataQueue.poll(DATA_TAKING_TIMEOUT, TimeUnit.SECONDS);
+			dataWrapper = dataQueue.poll(timeoutAfterClosing, TimeUnit.SECONDS);
 		}
 		else {
 			dataWrapper = dataQueue.take();
 			if (dataWrapper.getData() == dataQueuePoisonObj) {
 				hasPoisonObjReceived = true;
-				dataWrapper = dataQueue.poll(DATA_TAKING_TIMEOUT, TimeUnit.SECONDS);
+				dataWrapper = dataQueue.poll(timeoutAfterClosing, TimeUnit.SECONDS);
 			}
 		}
 		

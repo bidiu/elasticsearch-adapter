@@ -69,6 +69,7 @@ public class Pipeline implements Closeable {
 		public static final String INDEX = "index";
 		public static final String TYPE = "type";
 		public static final String IS_BULK = "isBulk";
+		public static final String TIMEOUT_AFTER_CLOSING = "timeoutAfterClosing";
 		
 		// default value
 		public static final boolean DEFAULT_IS_INBOUND = true;
@@ -77,6 +78,8 @@ public class Pipeline implements Closeable {
 		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
 		public static final int DEFAULT_PORT = 9300;
 		public static final boolean DEFAULT_IS_BULK = false;
+		/** In second unit */
+		public static final int DEFAULT_TIMEOUT_AFTER_CLOSING = 0;
 		
 		/**
 		 * Builder that can build {@link PipelineSettings}.
@@ -101,6 +104,7 @@ public class Pipeline implements Closeable {
 				map.put(CLUSTER_NAME, DEFAULT_CLUSTER_NAME);
 				map.put(PORT, String.valueOf(DEFAULT_PORT));
 				map.put(IS_BULK, String.valueOf(DEFAULT_IS_BULK));
+				map.put(TIMEOUT_AFTER_CLOSING, String.valueOf(DEFAULT_TIMEOUT_AFTER_CLOSING));
 			}
 			
 			/*
@@ -146,6 +150,17 @@ public class Pipeline implements Closeable {
 				map.put(IS_BULK, String.valueOf(isBulk));
 				return this;
 			}
+			/**
+			 * @param timeoutAfterClosing
+			 * 		In second unit.
+			 * @return
+			 * @author sunhe
+			 * @date 2016年5月11日
+			 */
+			public SettingsBuilder timeoutAfterClosing(int timeoutAfterClosing) {
+				map.put(TIMEOUT_AFTER_CLOSING, String.valueOf(timeoutAfterClosing));
+				return this;
+			}
 			
 			/**
 			 * Build a {@link PipelineSettings}.
@@ -167,6 +182,7 @@ public class Pipeline implements Closeable {
 				settings.setIndex(map.get(INDEX));
 				settings.setType(map.get(TYPE));
 				settings.setBulk(Boolean.valueOf(map.get(IS_BULK)));
+				settings.setTimeoutAfterClosing(Integer.parseInt(map.get(TIMEOUT_AFTER_CLOSING)));
 				return settings;
 			}
 			
@@ -215,6 +231,11 @@ public class Pipeline implements Closeable {
 		 */
 		private boolean isBulk;
 		
+		/**
+		 * In second unit.
+		 */
+		private int timeoutAfterClosing;
+		
 		private PipelineSettings() {
 			
 		}
@@ -249,6 +270,9 @@ public class Pipeline implements Closeable {
 		public boolean isBulk() {
 			return isBulk;
 		}
+		public int getTimeoutAfterClosing() {
+			return timeoutAfterClosing;
+		}
 		
 		/*
 		 * setters ..
@@ -279,6 +303,9 @@ public class Pipeline implements Closeable {
 		}
 		private synchronized void setBulk(boolean isBulk) {
 			this.isBulk = isBulk;
+		}
+		private synchronized void setTimeoutAfterClosing(int timeoutAfterClosing) {
+			this.timeoutAfterClosing = timeoutAfterClosing;
 		}
 		
 		public static SettingsBuilder builder() {

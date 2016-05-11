@@ -23,11 +23,13 @@ public class DataListSplitterTest {
 		return doc;
 	}
 	
+	@Ignore
 	@Test
 	public void test() throws InterruptedException {
 		PipelineSettings settings = PipelineSettings.builder()
-				.index("splitter-test")
+				.index("splitter-test-bbb")
 				.type("type")
+				.timeoutAfterClosing(0)
 				.build();
 		Pipeline pipeline = Pipeline.build(settings, new AdapterChainInitializer() {
 			

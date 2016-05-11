@@ -35,6 +35,8 @@ public abstract class AbstractPipelineTask implements Runnable {
 	
 	protected String type;
 	
+	protected int timeoutAfterClosing;
+	
 	public AbstractPipelineTask(PipelineContext pipelineCtx) {
 		this.pipelineCtx = pipelineCtx;
 		settings = pipelineCtx.getSettings();
@@ -45,6 +47,7 @@ public abstract class AbstractPipelineTask implements Runnable {
 		realDataQueuePoisonObj = pipelineCtx.getRealDataQueuePoisonObj();
 		index = settings.getIndex();
 		type = settings.getType();
+		timeoutAfterClosing = settings.getTimeoutAfterClosing();
 	}
 	
 }
