@@ -4,6 +4,12 @@ import java.util.List;
 
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
+/**
+ * TODO when incoming data is not list, return intact
+ * 
+ * @author sunhe
+ * @date May 13, 2016
+ */
 public class DataListSplitter<T> extends AbstractAdapter implements QueueDataProvidingAdapter {
 	
 	protected void split(List<T> list, AdapterContext ctx) {

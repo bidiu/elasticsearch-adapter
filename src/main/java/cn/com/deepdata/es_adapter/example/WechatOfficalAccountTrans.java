@@ -18,22 +18,21 @@ import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 public class WechatOfficalAccountTrans {
 	
 	public static void main(String[] args) throws InterruptedException {
-		String file = "/Users/sunhe/Downloads/output.csv";
+		String file = "/home/hadoop/sunhe/sample.json";
 		
 		PipelineSettings settings = PipelineSettings.builder()
-				.index("weixin-test")
-				.type("type")
-				.timeoutAfterClosing(30)
+				.host("localhost")
+				.port(19300)
+				.index("flume-weixin-data")
+				.type("weixin-data")
+				.timeoutAfterClosing(15)
 				.build();
-		
 		Pipeline pipeline = Pipeline.build(settings, new AdapterChainInitializer() {
 			
 			@Override
 			public void initialize(AdapterChain adapterChain) {
-				//
 				adapterChain.addLast(new File2LinesAdapter());
 				
-				//
 				HashMap<String, String> attrNameMap = new HashMap<>();
 				attrNameMap.put("enName", "sn_enName");
 				attrNameMap.put("desc", "sc_desc");
@@ -44,7 +43,6 @@ public class WechatOfficalAccountTrans {
 				attrNameMap.put("gzhUrl", "sup_gzhUrl");
 				adapterChain.addLast(new SimpleAttrNameAdapter(attrNameMap));
 				
-				//
 				adapterChain.addLast(new DataListSplitter<Object>());
 			}
 			
