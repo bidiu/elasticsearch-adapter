@@ -2,7 +2,6 @@ package cn.com.deepdata.es_adapter.adapter;
 
 import java.util.List;
 
-import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
@@ -36,18 +35,6 @@ public class DataListSplitter<T> extends AbstractAdapter {
 		List<T> list = (List<T>) data;
 		split(list, ctx);
 		throw new SkipAdaptingException();
-	}
-	
-	@Override
-	public Object onInboundException(ExceptionEvent event) {
-		event.setShouldPropagate(false);
-		return event;
-	}
-	
-	@Override
-	public Object onOutboundException(ExceptionEvent event) {
-		event.setShouldPropagate(false);
-		return event;
 	}
 	
 }
