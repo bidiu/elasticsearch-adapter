@@ -8,6 +8,12 @@ import java.nio.charset.Charset;
 
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
+/**
+ * TODO inputstream support
+ * 
+ * @author sunhe
+ * @date May 13, 2016
+ */
 public class File2LinesAdapter extends AbstractAdapter implements QueueDataProvidingAdapter {
 	
 	private static final String DEFAULT_FILE_ENCODING = "UTF-8";
