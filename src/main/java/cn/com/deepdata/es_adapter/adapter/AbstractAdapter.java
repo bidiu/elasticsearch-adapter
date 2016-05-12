@@ -3,6 +3,7 @@ package cn.com.deepdata.es_adapter.adapter;
 import java.util.concurrent.BlockingQueue;
 
 import cn.com.deepdata.es_adapter.ExceptionEvent;
+import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
@@ -118,6 +119,9 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @date Apr 17, 2016
 	 */
 	public Object onInboundException(ExceptionEvent event) {
+		if (event.getCause() instanceof SkipAdaptingException) {
+			event.setShouldPropagate(false);
+		}
 		return event;
 	}
 	
@@ -131,6 +135,9 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @date Apr 17, 2016
 	 */
 	public Object onOutboundException(ExceptionEvent event) {
+		if (event.getCause() instanceof SkipAdaptingException) {
+			event.setShouldPropagate(false);
+		}
 		return event;
 	};
 	
