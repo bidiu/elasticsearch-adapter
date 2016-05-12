@@ -22,7 +22,7 @@ public class DefaultIndexResponseListener implements ResponseListener<IndexRespo
 	}
 
 	@Override
-	public void onFailure(ExceptionEvent event) {
+	public void onException(ExceptionEvent event) {
 		event.getCause().printStackTrace();
 	}
 	

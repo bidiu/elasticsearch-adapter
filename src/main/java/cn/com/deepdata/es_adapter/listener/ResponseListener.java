@@ -31,6 +31,6 @@ public interface ResponseListener<Response> {
 	 * @author sunhe
 	 * @date Apr 17, 2016
 	 */
-    void onFailure(ExceptionEvent event);
+    void onException(ExceptionEvent event);
 	
 }

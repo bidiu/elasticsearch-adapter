@@ -97,7 +97,7 @@ public class InboundTask extends AbstractPipelineTask {
 				catch (Exception e) {
 					try {
 						((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener())
-								.onFailure(new ExceptionEvent(e, dataWrapper));
+								.onException(new ExceptionEvent(e, dataWrapper));
 					}
 					catch (RuntimeException runtimeE) {
 						runtimeE.printStackTrace();
