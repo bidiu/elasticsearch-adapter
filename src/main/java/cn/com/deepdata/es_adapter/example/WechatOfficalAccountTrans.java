@@ -18,7 +18,7 @@ import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 public class WechatOfficalAccountTrans {
 	
 	public static void main(String[] args) throws InterruptedException {
-		String file = "C:\\Users\\deepdata\\Desktop\\output.csv";
+		String file = "/Users/sunhe/Downloads/output.csv";
 		
 		PipelineSettings settings = PipelineSettings.builder()
 				.index("weixin-test")

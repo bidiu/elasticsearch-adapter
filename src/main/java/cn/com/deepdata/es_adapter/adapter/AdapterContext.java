@@ -32,7 +32,7 @@ public class AdapterContext {
 	}
 	
 	public synchronized Class<?> getNextAdapterClazz() {
-		return nextAdapter.getClass();
+		return nextAdapter == null ? ReservedTailAdapter.class : nextAdapter.getClass();
 	}
 
 	/**
