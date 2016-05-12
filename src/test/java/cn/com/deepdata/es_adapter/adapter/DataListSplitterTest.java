@@ -27,9 +27,9 @@ public class DataListSplitterTest {
 	@Test
 	public void test() throws InterruptedException {
 		PipelineSettings settings = PipelineSettings.builder()
-				.index("splitter-test-bbb")
+				.index("splitter-test-ggg")
 				.type("type")
-				.timeoutAfterClosing(0)
+				.timeoutAfterClosing(10)
 				.build();
 		Pipeline pipeline = Pipeline.build(settings, new AdapterChainInitializer() {
 			
@@ -47,7 +47,6 @@ public class DataListSplitterTest {
 		dataList.add(getDoc("0001"));
 		dataList.add(getDoc("0002"));
 		pipeline.putData(dataList);
-		Thread.sleep(20 * 1000);
 		pipeline.close();
 	}
 

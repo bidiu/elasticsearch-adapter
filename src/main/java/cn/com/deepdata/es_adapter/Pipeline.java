@@ -565,6 +565,18 @@ public class Pipeline implements Closeable {
 			// tell the caller current thread was interrupted during close operation
 			Thread.currentThread().interrupt();
 		}
+		
+		// the only data in the queue should be real poison pill
+		if (pipelineCtx.getDataQueue().size() > 1) {
+			throw new IllegalStateException(
+					"The queue is still being populated with some data when trying to close the pipeline, " + 
+					"basically this is because you use some adapters that also put data into the queue. " + 
+					"Except for this, other data has been transfered successfully. " + 
+					"If you want to retry in order to tranfer the data still being in the queue, " + 
+					"first try to undo the data that has been transfered, " + 
+					"and then set the configuration parameter 'timeoutAfterClosing' with a proper value (default is 0 second). " + 
+					"For more information about this issue, please refer to this (TODO). ");
+		}
 	}
 	
 }
