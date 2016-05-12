@@ -3,15 +3,14 @@ package cn.com.deepdata.es_adapter.adapter;
 import java.util.List;
 
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
-import cn.com.deepdata.es_adapter.model.DataWrapper;
 
-public class DataListSplitter<T> extends AbstractAdapter {
+public class DataListSplitter<T> extends AbstractAdapter implements QueueDataProvidingAdapter {
 	
 	protected void split(List<T> list, AdapterContext ctx) {
 		for (T ele : list) {
 			while (true) {
 				try {
-					getDataQueue().put(new DataWrapper(ele, ctx.getNextAdapterClazz()));
+					putData(ele, ctx.getNextAdapterClazz());
 					break;
 				}
 				catch (InterruptedException e) {

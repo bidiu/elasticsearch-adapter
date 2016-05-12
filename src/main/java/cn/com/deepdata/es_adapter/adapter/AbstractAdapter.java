@@ -21,13 +21,41 @@ public abstract class AbstractAdapter implements Adapter {
 	
 	private BlockingQueue<DataWrapper> dataQueue;
 	
-	protected BlockingQueue<DataWrapper> getDataQueue() {
-		if (dataQueue == null) {
+	protected final BlockingQueue<DataWrapper> getDataQueue() {
+		if (! (this instanceof QueueDataProvidingAdapter)) {
+			throw new IllegalStateException("In order to call this function, the adapter has to implement QueueDataProvidingAdater interface");
+		}
+		else if (dataQueue == null) {
 			throw new IllegalStateException("You have to register this adapter to an adpter chain first");
 		}
 		else {
 			return dataQueue;
 		}
+	}
+	
+	/**
+	 * TODO for now, this function can be called in both inbound and outbound mode
+	 * 
+	 * @param data
+	 * @throws InterruptedException
+	 * @author sunhe
+	 * @date 2016年5月12日
+	 */
+	protected final void putData(Object data) throws InterruptedException {
+		getDataQueue().put(new DataWrapper(data));
+	}
+	
+	/**
+	 * TODO for now, this function can be called in both inbound and outbound mode
+	 * 
+	 * @param data
+	 * @param firstAdapterClazz
+	 * @throws InterruptedException
+	 * @author sunhe
+	 * @date 2016年5月12日
+	 */
+	protected final void putData(Object data, Class<?> firstAdapterClazz) throws InterruptedException {
+		getDataQueue().put(new DataWrapper(data, firstAdapterClazz));
 	}
 	
 	@Override
