@@ -1,5 +1,6 @@
 package cn.com.deepdata.es_adapter.example;
 
+import java.io.InputStream;
 import java.util.HashMap;
 
 import cn.com.deepdata.es_adapter.Pipeline;
@@ -7,7 +8,7 @@ import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
 import cn.com.deepdata.es_adapter.adapter.DataListSplitter;
-import cn.com.deepdata.es_adapter.adapter.File2LinesAdapter;
+import cn.com.deepdata.es_adapter.adapter.InputStream2LinesAdapter;
 import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 
 /**
@@ -18,12 +19,10 @@ import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 public class WechatOfficalAccountTrans {
 	
 	public static void main(String[] args) throws InterruptedException {
-		String file = "/home/hadoop/sunhe/sample.json";
+		InputStream stream = WechatOfficalAccountTrans.class.getResourceAsStream("/example/sample.json");
 		
 		PipelineSettings settings = PipelineSettings.builder()
-				.host("localhost")
-				.port(19300)
-				.index("flume-weixin-data")
+				.index("flume-weixin-data-zzzz")
 				.type("weixin-data")
 				.timeoutAfterClosing(15)
 				.build();
@@ -31,7 +30,7 @@ public class WechatOfficalAccountTrans {
 			
 			@Override
 			public void initialize(AdapterChain adapterChain) {
-				adapterChain.addLast(new File2LinesAdapter());
+				adapterChain.addLast(new InputStream2LinesAdapter());
 				
 				HashMap<String, String> attrNameMap = new HashMap<>();
 				attrNameMap.put("enName", "sn_enName");
@@ -47,7 +46,7 @@ public class WechatOfficalAccountTrans {
 			}
 			
 		});
-		pipeline.putData(file);
+		pipeline.putData(stream);
 		pipeline.close();
 	}
 	

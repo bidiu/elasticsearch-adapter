@@ -43,7 +43,8 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * TODO adapter bundle <br/>
  * TODO refine Javadoc <br/>
  * TODO outbound mode <br/>
- * TODO hang bug
+ * TODO hang bug <br/>
+ * TODO add a clearer thraed model <br/>
  * 
  * @author sunhe
  * @date 2016年3月18日
