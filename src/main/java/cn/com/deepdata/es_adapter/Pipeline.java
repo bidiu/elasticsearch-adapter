@@ -37,11 +37,10 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO aggregation apdater <br/>
- * TODO bulk mode <br/>
- * TODO adapter bundle <br/>
- * TODO more advanced listener <br/>
+ * TODO adapter generic <br/>
  * TODO refine Javadoc <br/>
+ * TODO bulk mode <br/>
+ * TODO more advanced listener <br/>
  * TODO hang bug <br/>
  * TODO outbound mode <br/>
  * 

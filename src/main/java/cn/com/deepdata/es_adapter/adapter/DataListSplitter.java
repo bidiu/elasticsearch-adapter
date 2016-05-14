@@ -26,10 +26,6 @@ public class DataListSplitter<T> extends AbstractAdapter implements QueueDataPro
 	
 	@Override
 	public Object inboundAdapt(Object data, AdapterContext ctx) throws Exception {
-		if (! (data instanceof List)) {
-			return data;
-		}
-		
 		@SuppressWarnings("unchecked")
 		List<T> list = (List<T>) data;
 		split(list, ctx);
@@ -38,10 +34,6 @@ public class DataListSplitter<T> extends AbstractAdapter implements QueueDataPro
 
 	@Override
 	public Object outboundAdapt(Object data, AdapterContext ctx) throws Exception {
-		if (! (data instanceof List)) {
-			return data;
-		}
-		
 		@SuppressWarnings("unchecked")
 		List<T> list = (List<T>) data;
 		split(list, ctx);
