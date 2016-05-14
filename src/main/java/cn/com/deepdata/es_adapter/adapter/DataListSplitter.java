@@ -5,8 +5,6 @@ import java.util.List;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
- * TODO when incoming data is not list, return intact
- * 
  * @author sunhe
  * @date May 13, 2016
  */
@@ -28,6 +26,10 @@ public class DataListSplitter<T> extends AbstractAdapter implements QueueDataPro
 	
 	@Override
 	public Object inboundAdapt(Object data, AdapterContext ctx) throws Exception {
+		if (! (data instanceof List)) {
+			return data;
+		}
+		
 		@SuppressWarnings("unchecked")
 		List<T> list = (List<T>) data;
 		split(list, ctx);
@@ -36,6 +38,10 @@ public class DataListSplitter<T> extends AbstractAdapter implements QueueDataPro
 
 	@Override
 	public Object outboundAdapt(Object data, AdapterContext ctx) throws Exception {
+		if (! (data instanceof List)) {
+			return data;
+		}
+		
 		@SuppressWarnings("unchecked")
 		List<T> list = (List<T>) data;
 		split(list, ctx);

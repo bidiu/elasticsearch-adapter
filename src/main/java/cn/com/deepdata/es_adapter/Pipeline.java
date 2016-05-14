@@ -39,12 +39,11 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * 
  * TODO aggregation apdater <br/>
  * TODO bulk mode <br/>
- * TODO more advanced listener <br/>
  * TODO adapter bundle <br/>
+ * TODO more advanced listener <br/>
  * TODO refine Javadoc <br/>
- * TODO outbound mode <br/>
  * TODO hang bug <br/>
- * TODO add a clearer thraed model <br/>
+ * TODO outbound mode <br/>
  * 
  * @author sunhe
  * @date 2016年3月18日

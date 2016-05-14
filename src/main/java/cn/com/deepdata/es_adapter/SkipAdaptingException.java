@@ -1,7 +1,6 @@
 package cn.com.deepdata.es_adapter;
 
 /**
- * 
  * @author sunhe
  * @date 2016年5月10日
  */

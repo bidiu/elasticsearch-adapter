@@ -34,8 +34,6 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * TODO for now, this function can be called in both inbound and outbound mode
-	 * 
 	 * @param data
 	 * @throws InterruptedException
 	 * @author sunhe
@@ -46,8 +44,6 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * TODO for now, this function can be called in both inbound and outbound mode
-	 * 
 	 * @param data
 	 * @param firstAdapterClazz
 	 * @throws InterruptedException

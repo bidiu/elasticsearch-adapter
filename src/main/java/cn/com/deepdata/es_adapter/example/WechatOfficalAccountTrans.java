@@ -12,7 +12,6 @@ import cn.com.deepdata.es_adapter.adapter.InputStream2LinesAdapter;
 import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 
 /**
- * 
  * @author sunhe
  * @date 2016年5月12日
  */
