@@ -6,7 +6,7 @@ import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * Adapter context, mainly for invoking next {@link Adapter adapter} on the {@link AdapterChain adapter chain}.
+ * Adapter's context. 
  * <p/>
  * This class is thread-safe.
  * 
@@ -41,8 +41,6 @@ public class AdapterContext {
 	 * @param dataWrapper
 	 * @return
 	 * @throws Exception
-	 * @author sunhe
-	 * @date 2016年5月10日
 	 */
 	DataWrapper fireNextAdapter(DataWrapper dataWrapper) throws Exception {
 		if (nextAdapter != null) {
@@ -65,8 +63,6 @@ public class AdapterContext {
 	 * @param event
 	 * @return
 	 * @throws Exception
-	 * @author sunhe
-	 * @date 2016年5月10日
 	 */
 	DataWrapper fireNextException(ExceptionEvent event) throws Exception {
 		if (nextAdapter != null) {

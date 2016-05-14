@@ -13,9 +13,6 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
  * The adapter chain composed of several adapters and its meta data.
  * <p/>
  * This class is thread-safe.
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public class AdapterChain {
 	
@@ -39,9 +36,6 @@ public class AdapterChain {
 	 * <p/>
 	 * Note that this function is only capable of setting the declared fields, 
 	 * as opposed to the inherited fields.
-	 * 
-	 * @author sunhe
-	 * @date 2016年5月10日
 	 */
 	private static void setPrivateFieldByReflection(Object obj, String fieldName, Object value) throws ReflectiveOperationException {
 		Class<?> clazz = obj.getClass();
@@ -58,22 +52,24 @@ public class AdapterChain {
 	 * Add an adapter to the rear of adapter chain
 	 * 
 	 * @param adapter
+	 * 		the adapter going to add
 	 * @return
 	 * 		the adapter chain itself
-	 * @author sunhe
-	 * @date Mar 18, 2016
 	 */
 	public synchronized AdapterChain addLast(Adapter adapter) {
 		return addLast(adapter, new HashMap<String, Object>());
 	}
 	
 	/**
+	 * Add an adapter to the rear of adapter chain, and with its 
+	 * message.
 	 * 
 	 * @param adapter
+	 * 		the adapter going to add
 	 * @param msg
+	 * 		the custom message associated with the given adapter
 	 * @return
-	 * @author sunhe
-	 * @date 2016年4月5日
+	 * 		the adapter chain itself
 	 */
 	public synchronized AdapterChain addLast(Adapter adapter, Map<String, Object> msg) {
 		try {
@@ -120,9 +116,7 @@ public class AdapterChain {
 	 * 		data to be processed
 	 * @return
 	 * 		the resulting data
-	 * @author sunhe
 	 * @throws Exception 
-	 * @date 2016年3月18日
 	 */
 	public DataWrapper fireAdapters(DataWrapper dataWrapper) throws Exception {
 		if (firstAdapter == null) {

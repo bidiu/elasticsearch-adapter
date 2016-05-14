@@ -1,8 +1,10 @@
 package cn.com.deepdata.es_adapter;
 
 /**
- * @author sunhe
- * @date 2016年5月10日
+ * Users can throw this exception in their custom adapters
+ * to quit the normal adapting flow, or say, there's no output (adapted) 
+ * data to be further processed. And the exception will be swallowed by 
+ * the library, which is desirable.
  */
 public class SkipAdaptingException extends RuntimeException {
 

@@ -7,20 +7,27 @@ import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * Abstract adapter class for extension. It's highly recommended to only 
+ * Abstract adapter class for extension. You should only 
  * override the abstract methods of this class.
  * <p/>
  * And note that extension of this class MUST be thread-safe.
  * <p/>
  * Also see {@link Adapter}.
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public abstract class AbstractAdapter implements Adapter {
 	
 	private BlockingQueue<DataWrapper> dataQueue;
 	
+	/**
+	 * Get the blocking queue that the elasticsearch adapter 
+	 * library uses internally. You can then put data with it.
+	 * <p/>
+	 * Note that it's recommended to invoke {@link #putData(Object)} 
+	 * or {@link #putData(Object, Class)}, instead of this one.
+	 * 
+	 * @return
+	 * 		the blocking queue that the elasticsearch adapter library uses
+	 */
 	protected final BlockingQueue<DataWrapper> getDataQueue() {
 		if (! (this instanceof QueueDataProvidingAdapter)) {
 			throw new IllegalStateException("In order to call this function, the adapter has to implement QueueDataProvidingAdater interface");
@@ -34,21 +41,30 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
+	 * Put data into the blocking queue that the elasticsearch adapter 
+	 * library uses internally. The put data will be first adapted by the 
+	 * first adapter in the chain, and then subsequent adapters one by 
+	 * one.
+	 * 
 	 * @param data
+	 * 		data going to be put into the queue
 	 * @throws InterruptedException
-	 * @author sunhe
-	 * @date 2016年5月12日
 	 */
 	protected final void putData(Object data) throws InterruptedException {
 		getDataQueue().put(new DataWrapper(data));
 	}
 	
 	/**
+	 * Put data into the blocking queue that the elasticsearch adapter 
+	 * library uses internally. The put data will be first adapted by the 
+	 * adapter that assigned by the given {@link Class} parameter, and then 
+	 * subsequent adapters one by one.
+	 * 
 	 * @param data
+	 * 		data going to be put into the queue
 	 * @param firstAdapterClazz
+	 * 		the first adapter's class literal that will first adapt the given data.
 	 * @throws InterruptedException
-	 * @author sunhe
-	 * @date 2016年5月12日
 	 */
 	protected final void putData(Object data, Class<?> firstAdapterClazz) throws InterruptedException {
 		getDataQueue().put(new DataWrapper(data, firstAdapterClazz));
@@ -71,15 +87,12 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * 
 	 * @param data
 	 * 		data to be processed
 	 * @param msg
 	 * 		current adapter's custom message
 	 * @return
 	 * 		the resulting data
-	 * @author sunhe
-	 * @date 2016年4月5日
 	 */
 	public abstract Object inboundAdapt(Object data, AdapterContext ctx) throws Exception;
 	
@@ -100,15 +113,12 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * 
 	 * @param data
 	 * 		data to be processed
 	 * @param msg
 	 * 		current adapter's custom message
 	 * @return
 	 * 		the resulting data
-	 * @author sunhe
-	 * @date 2016年4月5日
 	 */
 	public abstract Object outboundAdapt(Object data, AdapterContext ctx) throws Exception;
 	
@@ -138,9 +148,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @return
 	 * 		If the exception handler method can recover from the exception, then 
 	 * 		the method should return the processed data, otherwise just return the provided 
-	 * 		parameter of the method, exception event.
-	 * @author sunhe
-	 * @date Apr 17, 2016
+	 * 		parameter {@link ExceptionEvent}.
 	 */
 	public Object onInboundException(ExceptionEvent event) {
 		if (event.getCause() instanceof SkipAdaptingException) {
@@ -154,9 +162,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * @return
 	 * 		If the exception handler method can recover from the exception, then 
 	 * 		the method should return the processed data, otherwise just return the provided 
-	 * 		parameter of the method, exception event.
-	 * @author sunhe
-	 * @date Apr 17, 2016
+	 * 		parameter {@link ExceptionEvent}.
 	 */
 	public Object onOutboundException(ExceptionEvent event) {
 		if (event.getCause() instanceof SkipAdaptingException) {

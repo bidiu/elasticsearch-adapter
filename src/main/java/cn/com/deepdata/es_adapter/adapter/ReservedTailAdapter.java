@@ -1,9 +1,5 @@
 package cn.com.deepdata.es_adapter.adapter;
 
-/**
- * @author sunhe
- * @date May 12, 2016
- */
 final class ReservedTailAdapter extends AbstractAdapter {
 
 	@Override

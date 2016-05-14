@@ -10,10 +10,9 @@ import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * The abstract class of {@link InboundTask} and {@link OutboundTask}.
- * 
- * @author sunhe
- * @date 2016年3月18日
+ * The abstract class of {@link InboundTask}.
+ * <p/>
+ * TODO outbound task
  */
 public abstract class AbstractPipelineTask implements Runnable {
 	

@@ -13,16 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The type of input data could be String, byte array, or Java object, while 
  * the type of output data is Map<String, Object>, or List<Object> if the given 
  * JSON is with value of array.
- * 
- * @author sunhe
- * @date 2016年5月6日
  */
 public class SimpleAttrNameAdapter extends Json2MapAdapter {
 	
 	protected Map<String, String> attrNameMap;
 	
-	// cannot be altered once instantiated
-	protected boolean isRecursive;
+	protected final boolean isRecursive;
 	
 	public SimpleAttrNameAdapter(Map<String, String> attrNameMap) {
 		this(attrNameMap, true, DEFAULT_OBJECT_MAPPER);

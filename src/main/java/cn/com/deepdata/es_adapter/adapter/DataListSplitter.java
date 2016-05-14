@@ -5,8 +5,10 @@ import java.util.List;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
- * @author sunhe
- * @date May 13, 2016
+ * Adapter that split the incoming data with list type to 
+ * individual elements
+ * <p/>
+ * T is the element's type.
  */
 public class DataListSplitter<T> extends AbstractAdapter implements QueueDataProvidingAdapter {
 	

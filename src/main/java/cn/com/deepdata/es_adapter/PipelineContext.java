@@ -14,9 +14,6 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
  * This class is {@link Pipeline pipeline} context.
  * <p/>
  * And this class is a immutable one.
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public class PipelineContext {
 	

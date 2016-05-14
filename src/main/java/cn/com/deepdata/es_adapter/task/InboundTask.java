@@ -16,9 +16,6 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * Runnable task for inbound mode.
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public class InboundTask extends AbstractPipelineTask {
 	

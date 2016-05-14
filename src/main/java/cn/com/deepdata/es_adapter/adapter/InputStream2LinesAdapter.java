@@ -8,11 +8,11 @@ import java.nio.charset.Charset;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
+ * Adapter that adapt {@link InputStream} to lines of content, in 
+ * String format.
+ * <p/>
  * There is no need to close the input stream by yourself, after draining out the 
  * input stream, this adapter will close it automatically.
- * 
- * @author sunhe
- * @date 2016年5月13日
  */
 public class InputStream2LinesAdapter extends AbstractAdapter implements QueueDataProvidingAdapter {
 	

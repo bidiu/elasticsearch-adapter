@@ -13,9 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p/>
  * If exception occurs while trying to adapt the data, the exception will be 
  * propagated along the adapter chain.
- * 
- * @author sunhe
- * @date 2016年5月6日
  */
 public class Json2MapAdapter extends AbstractAdapter {
 	
@@ -32,8 +29,6 @@ public class Json2MapAdapter extends AbstractAdapter {
 	 * {@link ObjectMapper} that the adapter uses.
 	 * 
 	 * @param objectMapper
-	 * @author sunhe
-	 * @date 2016年5月6日
 	 */
 	public Json2MapAdapter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
@@ -45,8 +40,6 @@ public class Json2MapAdapter extends AbstractAdapter {
 	 * @param data
 	 * @return
 	 * @throws Exception
-	 * @author sunhe
-	 * @date 2016年5月9日
 	 */
 	protected Object adapt(Object data) throws Exception {
 		if (data instanceof Map) {

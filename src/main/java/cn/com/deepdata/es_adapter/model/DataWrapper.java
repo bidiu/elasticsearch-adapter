@@ -2,9 +2,6 @@ package cn.com.deepdata.es_adapter.model;
 
 /**
  * Thread-safe.
- * 
- * @author sunhe
- * @date 2016年5月9日
  */
 public class DataWrapper {
 	

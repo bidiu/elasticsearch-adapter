@@ -37,14 +37,10 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO refine Javadoc <br/>
  * TODO bulk mode <br/>
  * TODO more advanced listener <br/>
  * TODO hang bug <br/>
  * TODO outbound mode <br/>
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public class Pipeline implements Closeable {
 	
@@ -52,9 +48,6 @@ public class Pipeline implements Closeable {
 	 * This class is {@link Pipeline} settings.
 	 * <p/>
 	 * The instance of this class is immutable and can be used repetitively.
-	 * 
-	 * @author sunhe
-	 * @date 2016年3月18日
 	 */
 	public static class PipelineSettings {
 		
@@ -85,9 +78,6 @@ public class Pipeline implements Closeable {
 		 * <p/>
 		 * Some settings have reasonable default value, so you do have 
 		 * to set all of them, unless you really need to.
-		 * 
-		 * @author sunhe
-		 * @date Apr 15, 2016
 		 */
 		public static class SettingsBuilder {
 			
@@ -153,8 +143,6 @@ public class Pipeline implements Closeable {
 			 * @param timeoutAfterClosing
 			 * 		In second unit.
 			 * @return
-			 * @author sunhe
-			 * @date 2016年5月11日
 			 */
 			public SettingsBuilder timeoutAfterClosing(int timeoutAfterClosing) {
 				map.put(TIMEOUT_AFTER_CLOSING, String.valueOf(timeoutAfterClosing));
@@ -165,8 +153,6 @@ public class Pipeline implements Closeable {
 			 * Build a {@link PipelineSettings}.
 			 * 
 			 * @return
-			 * @author sunhe
-			 * @date 2016年4月15日
 			 */
 			public PipelineSettings build() {
 				PipelineSettings settings =  new PipelineSettings();
@@ -320,8 +306,6 @@ public class Pipeline implements Closeable {
 		 * true.
 		 * 
 		 * @return
-		 * @author sunhe
-		 * @date Mar 18, 2016
 		 */
 		public boolean validate() {
 			if (index == null || type == null) {
@@ -370,8 +354,6 @@ public class Pipeline implements Closeable {
 	 * @param adapterChainInitializer
 	 * @param indexResponseListener
 	 * @return
-	 * @author sunhe
-	 * @date Apr 15, 2016
 	 */
 	public static Pipeline build(
 			PipelineSettings settings, 
@@ -428,8 +410,6 @@ public class Pipeline implements Closeable {
 	 * @param settings
 	 * @param adapterChainInitializer
 	 * @return
-	 * @author sunhe
-	 * @date Apr 15, 2016
 	 */
 	public static Pipeline build(
 			PipelineSettings settings, 
@@ -443,8 +423,6 @@ public class Pipeline implements Closeable {
 	 * @param settings
 	 * @param responseListener
 	 * @return
-	 * @author sunhe
-	 * @date Apr 15, 2016
 	 */
 	public static Pipeline build(
 			PipelineSettings settings, 
@@ -457,8 +435,6 @@ public class Pipeline implements Closeable {
 	 * 
 	 * @param settings
 	 * @return
-	 * @author sunhe
-	 * @date 2016年3月18日
 	 */
 	public static Pipeline build(PipelineSettings settings) {
 		return build(settings, null, new DefaultIndexResponseListener());
@@ -479,8 +455,6 @@ public class Pipeline implements Closeable {
 	 * 
 	 * @param data
 	 * @throws InterruptedException
-	 * @author sunhe
-	 * @date 2016年3月18日
 	 */
 	public void putData(Object data) throws InterruptedException {
 		if (isClosed) {
@@ -511,8 +485,6 @@ public class Pipeline implements Closeable {
 	 * 
 	 * @return
 	 * @throws InterruptedException
-	 * @author sunhe
-	 * @date 2016年3月18日
 	 */
 	public Object takeData() throws InterruptedException {
 		if (isClosed) {
@@ -535,9 +507,6 @@ public class Pipeline implements Closeable {
 	 * is closed, otherwise exception will occur.
 	 * <p/>
 	 * Also see {@link cn.com.deepdata.es_adapter.common.Closeable#close()}.
-	 * 
-	 * @author sunhe
-	 * @date Mar 19, 2016
 	 */
 	@Override
 	public synchronized void close() {

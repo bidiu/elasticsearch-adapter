@@ -4,9 +4,6 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
  * This class is not thread-safe.
- * 
- * @author sunhe
- * @date Apr 17, 2016
  */
 public class ExceptionEvent {
 	

@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 
 /**
- * @author sunhe
- * @date May 13, 2016
+ * Adapters that adapt file, either {@link File} or {@link String} (file name), 
+ * to lines of content, in {@link String} format,  
+ * with a specific encoding.
  */
 public class File2LinesAdapter extends InputStream2LinesAdapter {
 	

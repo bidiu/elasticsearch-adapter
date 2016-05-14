@@ -8,19 +8,15 @@ package cn.com.deepdata.es_adapter.adapter;
  * adapters on the adapter chain will be invoked sequentially one by one.
  * <p/>
  * And also note that implementation of this interface should be thread-safe.
- * 
- * @author sunhe
- * @date 2016年3月18日
  */
 public interface AdapterChainInitializer {
 	
 	/**
 	 * Invoke the parameter "adapterChian" 's method {@link AdapterChain#addLast(Adapter)} 
+	 * or {@link AdapterChain#addLast(Adapter, java.util.Map)}
 	 * to add adapters.
 	 * 
 	 * @param adapterChain
-	 * @author sunhe
-	 * @date Mar 18, 2016
 	 */
 	public void initialize(AdapterChain adapterChain);
 	
