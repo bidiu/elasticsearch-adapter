@@ -25,9 +25,9 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
 
 /**
  * {@link Pipeline} is an abstract of channel that connects a data source to an 
- * Elasticsearch cluster, so that data can be transmitted into or out of the 
+ * elasticsearch cluster, so that data can be transmitted into or out of the 
  * cluster. Client can use this class to aggregate different components of this 
- * elasticsearch-adapter library and perform operations against Elasticsearch 
+ * elasticsearch-adapter library and perform operations against elasticsearch 
  * cluster.
  * <p/>
  * Note that this class MUST be closed by invoking the method {@link #close()} 
@@ -37,9 +37,9 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * This class is thread-safe.
  * <p/>
  * 
- * TODO bulk mode <br/>
- * TODO more advanced listener <br/>
  * TODO hang bug <br/>
+ * TODO more advanced listener <br/>
+ * TODO bulk mode <br/>
  * TODO outbound mode <br/>
  */
 public class Pipeline implements Closeable {
@@ -76,7 +76,7 @@ public class Pipeline implements Closeable {
 		/**
 		 * Builder that can build {@link PipelineSettings}.
 		 * <p/>
-		 * Some settings have reasonable default value, so you do have 
+		 * Some settings have reasonable default value, so you don't have 
 		 * to set all of them, unless you really need to.
 		 */
 		public static class SettingsBuilder {
