@@ -124,6 +124,11 @@ public abstract class AbstractAdapter implements Adapter {
 	
 	@Override
 	public final DataWrapper onException(AdapterContext ctx, ExceptionEvent event) throws Exception {
+		if (event.getCause() instanceof SkipAdaptingException) {
+			event.setShouldPropagate(false);
+			throw event.getCause();
+		}
+		
 		Object adaptedData = ctx.isInbound() ? onInboundException(event) : onOutboundException(event);
 		
 		if (adaptedData instanceof ExceptionEvent) {
@@ -151,9 +156,6 @@ public abstract class AbstractAdapter implements Adapter {
 	 * 		parameter {@link ExceptionEvent}.
 	 */
 	public Object onInboundException(ExceptionEvent event) {
-		if (event.getCause() instanceof SkipAdaptingException) {
-			event.setShouldPropagate(false);
-		}
 		return event;
 	}
 	
@@ -165,9 +167,6 @@ public abstract class AbstractAdapter implements Adapter {
 	 * 		parameter {@link ExceptionEvent}.
 	 */
 	public Object onOutboundException(ExceptionEvent event) {
-		if (event.getCause() instanceof SkipAdaptingException) {
-			event.setShouldPropagate(false);
-		}
 		return event;
 	};
 	

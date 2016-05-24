@@ -6,7 +6,7 @@ package cn.com.deepdata.es_adapter;
  * data to be further processed. And the exception will be swallowed by 
  * the library, which is desirable.
  */
-public class SkipAdaptingException extends RuntimeException {
+public class SkipAdaptingException extends Exception {
 
 	private static final long serialVersionUID = 5736957710381378729L;
 	
