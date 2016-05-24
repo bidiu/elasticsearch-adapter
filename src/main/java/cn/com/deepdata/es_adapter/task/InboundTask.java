@@ -11,7 +11,6 @@ import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.PipelineContext;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.UnsupportedJsonFormatException;
-import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
@@ -86,15 +85,14 @@ public class InboundTask extends AbstractPipelineTask {
 					
 					// fire index request
 					indexResponse = indexRequestBuilder.execute().actionGet();
-					((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener()).onResponse(indexResponse);
+					fireResponseListener(indexResponse);
 				}
 				catch (SkipAdaptingException e) {
 					// swallow
 				}
 				catch (Exception e) {
 					try {
-						((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener())
-								.onException(new ExceptionEvent(e, dataWrapper));
+						fireResponseListener(new ExceptionEvent(e, dataWrapper));
 					}
 					catch (RuntimeException runtimeE) {
 						runtimeE.printStackTrace();

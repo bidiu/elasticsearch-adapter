@@ -41,6 +41,7 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * TODO more advanced listener <br/>
  * TODO bulk mode <br/>
  * TODO outbound mode <br/>
+ * TODO log4j <br/>
  */
 public class Pipeline implements Closeable {
 	
@@ -336,6 +337,9 @@ public class Pipeline implements Closeable {
 	}
 	public synchronized Client getClient() {
 		return pipelineCtx.getClient();
+	}
+	public synchronized PipelineSettings getPipelineSettings() {
+		return pipelineCtx.getSettings();
 	}
 	private synchronized ExecutorService getExecutorService() {
 		return executorService;

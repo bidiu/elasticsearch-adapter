@@ -2,11 +2,16 @@ package cn.com.deepdata.es_adapter.task;
 
 import java.util.concurrent.BlockingQueue;
 
+import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 
 import cn.com.deepdata.es_adapter.PipelineContext;
+import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.Pipeline.PipelineSettings;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
+import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
@@ -16,25 +21,25 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
  */
 public abstract class AbstractPipelineTask implements Runnable {
 	
-	protected PipelineContext pipelineCtx;
+	protected final PipelineContext pipelineCtx;
 	
-	protected PipelineSettings settings;
+	protected final PipelineSettings settings;
 	
-	protected Client client;
+	protected final Client client;
 	
-	protected BlockingQueue<DataWrapper> dataQueue;
+	protected final BlockingQueue<DataWrapper> dataQueue;
 	
-	protected AdapterChain adapterChain;
+	protected final AdapterChain adapterChain;
 	
-	protected Object dataQueuePoisonObj;
+	protected final Object dataQueuePoisonObj;
 	
-	protected Object realDataQueuePoisonObj;
+	protected final Object realDataQueuePoisonObj;
 	
-	protected String index;
+	protected final String index;
 	
-	protected String type;
+	protected final String type;
 	
-	protected int timeoutAfterClosing;
+	protected final int timeoutAfterClosing;
 	
 	public AbstractPipelineTask(PipelineContext pipelineCtx) {
 		this.pipelineCtx = pipelineCtx;
@@ -47,6 +52,27 @@ public abstract class AbstractPipelineTask implements Runnable {
 		index = settings.getIndex();
 		type = settings.getType();
 		timeoutAfterClosing = settings.getTimeoutAfterClosing();
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void fireResponseListener(ActionResponse response) {
+		if (settings.isInbound()) {
+			if (settings.isBulk()) {
+				((ResponseListener<BulkResponse>) pipelineCtx.getResponseListener())
+						.onResponse((BulkResponse) response);
+			}
+			else {
+				((ResponseListener<IndexResponse>) pipelineCtx.getResponseListener())
+						.onResponse((IndexResponse) response);
+			}
+		}
+		else {
+			// TODO
+		}
+	}
+	
+	protected void fireResponseListener(ExceptionEvent event) {
+		pipelineCtx.getResponseListener().onException(event);
 	}
 	
 }

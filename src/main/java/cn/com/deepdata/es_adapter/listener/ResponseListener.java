@@ -1,5 +1,7 @@
 package cn.com.deepdata.es_adapter.listener;
 
+import org.elasticsearch.action.ActionResponse;
+
 import cn.com.deepdata.es_adapter.ExceptionEvent;
 
 /**
@@ -17,14 +19,14 @@ import cn.com.deepdata.es_adapter.ExceptionEvent;
  * @author sunhe
  * @date Mar 19, 2016
  */
-public interface ResponseListener<Response> {
+public interface ResponseListener<T extends ActionResponse> {
 	
 	/**
 	 * @param response
 	 * @author sunhe
 	 * @date Apr 17, 2016
 	 */
-	void onResponse(Response response);
+	void onResponse(T response);
 	
 	/**
 	 * @param event

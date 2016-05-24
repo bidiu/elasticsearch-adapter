@@ -13,25 +13,25 @@ import cn.com.deepdata.es_adapter.model.DataWrapper;
 /**
  * This class is {@link Pipeline pipeline} context.
  * <p/>
- * And this class is a immutable one.
+ * And this class is immutable.
  */
 public class PipelineContext {
 	
-	private PipelineSettings settings;
+	private final PipelineSettings settings;
 	
-	private Client client;
+	private final Client client;
 	
-	private BlockingQueue<DataWrapper> dataQueue;
+	private final BlockingQueue<DataWrapper> dataQueue;
 	
-	private AdapterChain adapterChain;
+	private final AdapterChain adapterChain;
 	
-	private Pipeline pipeline;
+	private final Pipeline pipeline;
 	
-	private ResponseListener<? extends ActionResponse> responseListener;
+	private final ResponseListener<? extends ActionResponse> responseListener;
 	
-	private Object dataQueuePoisonObj;
+	private final Object dataQueuePoisonObj;
 	
-	private Object realDataQueuePoisonObj;
+	private final Object realDataQueuePoisonObj;
 	
 	public PipelineContext(PipelineSettings settings, Client client, 
 			BlockingQueue<DataWrapper> dataQueue, AdapterChain adapterChain, 
