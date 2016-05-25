@@ -16,7 +16,7 @@ public class DefaultIndexResponseListener implements ResponseListener<IndexRespo
 
 	@Override
 	public void onResponse(IndexResponse response) {
-		// TODO
+		// empty
 	}
 
 	@Override

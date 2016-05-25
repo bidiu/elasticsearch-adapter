@@ -1,5 +1,6 @@
 package cn.com.deepdata.es_adapter.listener;
 
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 
 import cn.com.deepdata.es_adapter.ExceptionEvent;
@@ -8,7 +9,13 @@ public class DefaultBulkResponseListener implements ResponseListener<BulkRespons
 
 	@Override
 	public void onResponse(BulkResponse response) {
-		// TODO
+		if (response.hasFailures()) {
+			for (BulkItemResponse bulkItemResponse : response) {
+				if (bulkItemResponse.isFailed()) {
+					System.out.println("Failure message: " + bulkItemResponse.getFailureMessage());
+				}
+			}
+		}
 	}
 
 	@Override
