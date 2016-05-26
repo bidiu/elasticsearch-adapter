@@ -63,7 +63,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>cn.com.deepdata.es_adapter.example.WechatOfficalAccountTrans</mainClass>
+									<mainClass>cn.com.deepdata.trans.CopyrightTrans</mainClass>
 								</transformer>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
