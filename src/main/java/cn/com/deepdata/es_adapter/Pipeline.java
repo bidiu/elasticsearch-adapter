@@ -18,6 +18,7 @@ import org.elasticsearch.node.NodeBuilder;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
 import cn.com.deepdata.es_adapter.common.Closeable;
+import cn.com.deepdata.es_adapter.listener.DefaultBulkResponseListener;
 import cn.com.deepdata.es_adapter.listener.DefaultIndexResponseListener;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
@@ -60,6 +61,7 @@ public class Pipeline implements Closeable {
 		public static final String INDEX = "index";
 		public static final String TYPE = "type";
 		public static final String IS_BULK = "isBulk";
+		public static final String REQUEST_BULK_SIZE = "requestBulkSize";
 		public static final String TIMEOUT_AFTER_CLOSING = "timeoutAfterClosing";
 		
 		// default value
@@ -69,6 +71,7 @@ public class Pipeline implements Closeable {
 		public static final String DEFAULT_CLUSTER_NAME = "elasticsearch";
 		public static final int DEFAULT_PORT = 9300;
 		public static final boolean DEFAULT_IS_BULK = false;
+		public static final int DEFAULT_REQUEST_BULK_SIZE = 128;
 		/** In second unit */
 		public static final int DEFAULT_TIMEOUT_AFTER_CLOSING = 0;
 		
@@ -92,6 +95,7 @@ public class Pipeline implements Closeable {
 				map.put(CLUSTER_NAME, DEFAULT_CLUSTER_NAME);
 				map.put(PORT, String.valueOf(DEFAULT_PORT));
 				map.put(IS_BULK, String.valueOf(DEFAULT_IS_BULK));
+				map.put(REQUEST_BULK_SIZE, String.valueOf(DEFAULT_REQUEST_BULK_SIZE));
 				map.put(TIMEOUT_AFTER_CLOSING, String.valueOf(DEFAULT_TIMEOUT_AFTER_CLOSING));
 			}
 			
@@ -138,6 +142,10 @@ public class Pipeline implements Closeable {
 				map.put(IS_BULK, String.valueOf(isBulk));
 				return this;
 			}
+			public SettingsBuilder requestBulkSize(int requestBulkSize) {
+				map.put(REQUEST_BULK_SIZE, String.valueOf(requestBulkSize));
+				return this;
+			}
 			/**
 			 * @param timeoutAfterClosing
 			 * 		In second unit.
@@ -166,6 +174,7 @@ public class Pipeline implements Closeable {
 				settings.setIndex(map.get(INDEX));
 				settings.setType(map.get(TYPE));
 				settings.setBulk(Boolean.valueOf(map.get(IS_BULK)));
+				settings.setRequestBulkSize(Integer.parseInt(map.get(REQUEST_BULK_SIZE)));
 				settings.setTimeoutAfterClosing(Integer.parseInt(map.get(TIMEOUT_AFTER_CLOSING)));
 				return settings;
 			}
@@ -216,6 +225,11 @@ public class Pipeline implements Closeable {
 		private boolean isBulk;
 		
 		/**
+		 * Only applicable when being in inbound mode.
+		 */
+		private int requestBulkSize;
+		
+		/**
 		 * In second unit.
 		 */
 		private int timeoutAfterClosing;
@@ -254,6 +268,9 @@ public class Pipeline implements Closeable {
 		public boolean isBulk() {
 			return isBulk;
 		}
+		public int getRequestBulkSize() {
+			return requestBulkSize;
+		}
 		public int getTimeoutAfterClosing() {
 			return timeoutAfterClosing;
 		}
@@ -287,6 +304,9 @@ public class Pipeline implements Closeable {
 		}
 		private synchronized void setBulk(boolean isBulk) {
 			this.isBulk = isBulk;
+		}
+		private synchronized void setRequestBulkSize(int requestBulkSize) {
+			this.requestBulkSize = requestBulkSize;
 		}
 		private synchronized void setTimeoutAfterClosing(int timeoutAfterClosing) {
 			this.timeoutAfterClosing = timeoutAfterClosing;
@@ -416,7 +436,15 @@ public class Pipeline implements Closeable {
 	public static Pipeline build(
 			PipelineSettings settings, 
 			AdapterChainInitializer adapterChainInitializer) {
-		return build(settings, adapterChainInitializer, new DefaultIndexResponseListener());
+		ResponseListener<? extends ActionResponse> responseListener = null;
+		if (settings.isBulk) {
+			responseListener = new DefaultBulkResponseListener();
+		}
+		else {
+			responseListener = new DefaultIndexResponseListener();
+		}
+		
+		return build(settings, adapterChainInitializer, responseListener);
 	}
 	
 	/**
@@ -439,7 +467,14 @@ public class Pipeline implements Closeable {
 	 * @return
 	 */
 	public static Pipeline build(PipelineSettings settings) {
-		return build(settings, null, new DefaultIndexResponseListener());
+		ResponseListener<? extends ActionResponse> responseListener = null;
+		if (settings.isBulk) {
+			responseListener = new DefaultBulkResponseListener();
+		}
+		else {
+			responseListener = new DefaultIndexResponseListener();
+		}
+		return build(settings, null, responseListener);
 	}
 	
 	/**
