@@ -28,7 +28,7 @@ public class DelimitedString2MapAdapter extends AbstractAdapter {
 	}
 	
 	public Map<String, Object> adapter(String str) {
-		String[] values = str.split(delimiterRegex);
+		String[] values = str.split(delimiterRegex, -1);
 		Map<String, Object> jsonMap = new HashMap<String, Object>();
 
 		for (int i = 0; i < values.length; i++) {
