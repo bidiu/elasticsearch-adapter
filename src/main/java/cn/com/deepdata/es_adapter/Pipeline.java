@@ -39,6 +39,7 @@ import cn.com.deepdata.es_adapter.task.InboundTask;
  * <p/>
  * 
  * TODO bulk mode <br/>
+ * TODO inbound mode'd support create/delete/update operation types <br/>
  * TODO outbound mode <br/>
  * TODO log4j <br/>
  */
