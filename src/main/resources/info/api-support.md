@@ -1,14 +1,14 @@
 ## REST APIs Support Info
 	Document APIs:
-		index(create)   [inbound]
-		get							[outbound]
+		index(create)   	[inbound]
+		get						[outbound]
 		delete					[don't support]
-		update					[inbound]					
+		update					[don't support]
 		
-	Bulk APIs					[in/outbound] [homogeneous]					
-		index(create)
-		delete
-		update
+	Bulk APIs					[homogeneous]
+		index(create)		[in/outbound]
+		delete					[don't support]
+		update					[don't support]
 		
 	Search APIs				[outbound]
 		scroll
