@@ -34,7 +34,7 @@ public class DelimitedString2MapAdapter extends AbstractAdapter {
 		String[] values = str.split(delimiterRegex, -1);
 		Map<String, Object> jsonMap = new HashMap<String, Object>();
 
-		for (int i = 0; i < values.length; i++) {
+		for (int i = 0; i < titleList.size(); i++) {
 			String value = shouldTrimValue ? values[i].trim() : values[i];
 			if (shouldConvertEmptyStrToNull && value.isEmpty()) {
 				jsonMap.put(titleList.get(i), null);
