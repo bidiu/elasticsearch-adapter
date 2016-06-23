@@ -25,10 +25,10 @@ import cn.com.deepdata.es_adapter.SkipAdaptingException;
  * This adapter is simplified, not very versatile - only supporting 1-layer, 2-dimensional 
  * layout of data. More specifically, the data to adapt should be like a 2-dimensional table, 
  * without inner complicated enclosing structure in it. And you can extend this class to 
- * provide more functionalities.
+ * provide more functionalities or change some default behaviors.
  * <p/>
  * This adapter can accept either {@link File} or {@link FileInputStream} representing the work 
- * sheet file to adapt as input.
+ * sheet file to adapt as an input.
  */
 public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueDataProvidingAdapter {
 	
@@ -40,12 +40,14 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	protected final List<Integer> sheetIndicesToAdapt;
 	protected final List<String> sheetNamesToAdapt;
 	
+	protected final boolean shouldTrimStr;
+	
 	/**
 	 * @param titleList
 	 * 		titles applied to each cell of a row
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList) {
-		this(titleList, 0, Integer.MAX_VALUE);
+		this(titleList, 0, Integer.MAX_VALUE, true);
 	}
 	
 	/**
@@ -56,7 +58,20 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * 		0-based, inclusive. 
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum) {
-		this(titleList, startRowNum, Integer.MAX_VALUE);
+		this(titleList, startRowNum, Integer.MAX_VALUE, true);
+	}
+	
+	/**
+	 * @param titleList
+	 * 		titles applied to each cell of a row
+	 * @param startRowNum
+	 * 		number of row, from which and above to adapt. 
+	 * 		0-based, inclusive. 
+	 * @param shouldTrimStr
+	 * 		whether string value should be trimed
+	 */
+	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, boolean shouldTrimStr) {
+		this(titleList, startRowNum, Integer.MAX_VALUE, shouldTrimStr);
 	}
 	
 	/**
@@ -68,9 +83,11 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * @param endRowNum
 	 * 		number of row, the last row to adapt. 
 	 * 		0-based, exclusive.
+	 * @param shouldTrimStr
+	 * 		whether string value should be trimed
 	 */
-	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, int endRowNum) {
-		this(titleList, null, null, startRowNum, endRowNum);
+	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, int endRowNum, boolean shouldTrimStr) {
+		this(titleList, null, null, startRowNum, endRowNum, shouldTrimStr);
 	}
 	
 	/**
@@ -80,7 +97,7 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * 		index of sheets to adapt
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt) {
-		this(titleList, sheetIndicesToAdapt, 0);
+		this(titleList, sheetIndicesToAdapt, 0, true);
 	}
 	
 	/**
@@ -91,22 +108,28 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * @param startRowNum
 	 * 		number of row, from which and above to adapt. 
 	 * 		0-based, inclusive. 
+	 * @param shouldTrimStr
+	 * 		whether string value should be trimed
 	 */
-	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt, int startRowNum) {
-		this(titleList, sheetIndicesToAdapt, null, startRowNum, Integer.MAX_VALUE);
+	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt, 
+			int startRowNum, boolean shouldTrimStr) {
+		this(titleList, sheetIndicesToAdapt, null, startRowNum, Integer.MAX_VALUE, shouldTrimStr);
 	}
 	
 	/**
 	 * @param titleList
 	 * 		titles applied to each cell of a row
+	 * @param sheetNamesToAdapt
+	 * 		name of sheets to adapt
+	 * @param shouldTrimStr
+	 * 		whether string value should be trimed
 	 * @param startRowNum
 	 * 		number of row, from which and above to adapt. 
 	 * 		0-based, inclusive. 
-	 * @param sheetNamesToAdapt
-	 * 		name of sheets to adapt
 	 */
-	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, List<String> sheetNamesToAdapt) {
-		this(titleList, null, sheetNamesToAdapt, startRowNum, Integer.MAX_VALUE);
+	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<String> sheetNamesToAdapt, 
+			boolean shouldTrimStr, int startRowNum) {
+		this(titleList, null, sheetNamesToAdapt, startRowNum, Integer.MAX_VALUE, shouldTrimStr);
 	}
 	
 	/**
@@ -125,9 +148,11 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * @param endRowNum
 	 * 		number of row, the last row to adapt. 
 	 * 		0-based, exclusive.
+	 * @param shouldTrimStr
+	 * 		whether string value should be trimed
 	 */
 	protected SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt, 
-			List<String> sheetNamesToAdapt, int startRowNum, int endRowNum) {
+			List<String> sheetNamesToAdapt, int startRowNum, int endRowNum, boolean shouldTrimStr) {
 		this.titleList = titleList;
 		this.sheetIndicesToAdapt = sheetIndicesToAdapt == null ? 
 				null : Collections.unmodifiableList(sheetIndicesToAdapt);
@@ -135,12 +160,13 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 				null : Collections.unmodifiableList(sheetNamesToAdapt);
 		this.startRowNum = startRowNum;
 		this.endRowNum = endRowNum;
+		this.shouldTrimStr = shouldTrimStr;
 	}
 	
 	/*
 	 * You can override the following extract* methods to 
 	 * change the default behavior how to extract value from 
-	 * different types of cells.
+	 * different types of cell.
 	 */
 	protected Object extractValueFromStringTypeCell(HSSFCell cell) {
 		return cell.getStringCellValue();
