@@ -36,7 +36,7 @@ public class ClientTest {
 				titleList.add("b");
 				titleList.add("c");
 				titleList.add("d");
-				adapterChain.addLast(new SimpleXlsFile2MapsAdapter(titleList, 1, 3));
+				adapterChain.addLast(new SimpleXlsFile2MapsAdapter(titleList, 1));
 				adapterChain.addLast(new AbstractAdapter() {
 					
 					private final ObjectMapper objectMapper = new ObjectMapper();

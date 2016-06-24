@@ -169,7 +169,11 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	 * different types of cell.
 	 */
 	protected Object extractValueFromStringTypeCell(HSSFCell cell) {
-		return cell.getStringCellValue();
+		String value = cell.getStringCellValue();
+		if (shouldTrimStr) {
+			value = value.trim();
+		}
+		return value;
 	}
 	protected Object extractValueFromNumericTypeCell(HSSFCell cell) {
 		return cell.getNumericCellValue();
