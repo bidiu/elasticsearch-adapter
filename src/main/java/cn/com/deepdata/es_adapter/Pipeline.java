@@ -103,8 +103,7 @@ public class Pipeline implements Closeable {
 				return this;
 			}
 			public SettingsBuilder outbound() {
-				map.put(IS_INBOUND, String.valueOf(false));
-				return this;
+				throw new IllegalStateException("Outbound mode currently is not supported.");
 			}
 			public SettingsBuilder dataQueueCapacity(int dataQueueCapacity) {
 				map.put(DATA_QUEUE_CAPACITY, String.valueOf(dataQueueCapacity));
