@@ -7,7 +7,7 @@ import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * 适配器的抽象基类，你应该继承之各类，并实现抽象方法，而不是直接实现接口
+ * 适配器的抽象基类，你应该继承这个类，并实现抽象方法，而不是直接实现接口
  * {@link Adapter}.
  * <p/>
  * And note that extension of this class MUST be thread-safe.
