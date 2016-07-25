@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Adapter that adapts delimited string to 
- * JSON in Map format.
+ * 适配器，将由特定字符分隔的字符序列适配为JSON（{@link Map}表示）.
  */
 public class DelimitedString2MapAdapter extends AbstractAdapter {
 	

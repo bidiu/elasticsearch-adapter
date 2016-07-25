@@ -8,8 +8,9 @@ import java.nio.charset.Charset;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
- * Adapter that adapt {@link InputStream} to lines of content, in 
- * String format.
+ * 适配器，将字符流{@link InputStream}适配为一行一行的字符串.
+ * <p/>
+ * Also see {@link File2LinesAdapter}.
  * <p/>
  * There is no need to close the input stream by yourself, after draining out the 
  * input stream, this adapter will close it automatically.

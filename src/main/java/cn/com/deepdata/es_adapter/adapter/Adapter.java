@@ -4,19 +4,16 @@ import cn.com.deepdata.es_adapter.ExceptionEvent;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * Adapt one specific type of data to another, or from a
- * one specific type to the same, but with some modification.
+ * 适配器，将输入的数据适配，并输出
  * <p/>
  * Note that implementation of this interface MUST be thread-safe.
  * <p/>
- * You MUST extend {@link AbstractAdapter}, instead of 
- * implementing this interface completely by your own.
+ * 你不应该直接实现这个接口，而应该继承{@link AdapterChain}.
  */
 public interface Adapter {
 	
 	/**
-	 * Note that parameter "ctx" MUST NOT be altered in this method, 
-	 * or the outcome is undefined.
+	 * 注意实现一定不能修改参数{@link AdapterContext}的状态，否则结果是未定义的.
 	 * 
 	 * @param ctx
 	 * @param dataWrapper
@@ -27,8 +24,7 @@ public interface Adapter {
 	public DataWrapper inboundAdapt(AdapterContext ctx, DataWrapper dataWrapper) throws Exception;
 	
 	/**
-	 * Note that parameter "ctx" MUST NOT be altered in this method, 
-	 * or the outcome is undefined.
+	 * 注意实现一定不能修改参数{@link AdapterContext}的状态，否则结果是未定义的.
 	 * 
 	 * @param ctx
 	 * @param dataWrapper
@@ -39,9 +35,9 @@ public interface Adapter {
 	public DataWrapper outboundAdapt(AdapterContext ctx, DataWrapper dataWrapper) throws Exception;
 	
 	/**
-	 * This method will be called when exception occurs during the 
-	 * execution of {@link #inboundAdapt(AdapterContext, DataWrapper)} 
-	 * and {@link #outboundAdapt(AdapterContext, DataWrapper)}.
+	 * 如果执行{@link #inboundAdapt(AdapterContext, DataWrapper)}和
+	 * {@link #outboundAdapt(AdapterContext, DataWrapper)}时抛出了异常，
+	 * 则会执行这个方法.
 	 * 
 	 * @param ctx
 	 * @param event

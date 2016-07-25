@@ -5,7 +5,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import cn.com.deepdata.es_adapter.ExceptionEvent;
 
 /**
- * Default index response listener that will log the response somewhere.
+ * Default index response listener that will log the exception to console.
  * <p/>
  * This class is thread-safe.
  * 

@@ -18,25 +18,25 @@ import org.elasticsearch.node.NodeBuilder;
 import cn.com.deepdata.es_adapter.adapter.AdapterChain;
 import cn.com.deepdata.es_adapter.adapter.AdapterChainInitializer;
 import cn.com.deepdata.es_adapter.common.Closeable;
+import cn.com.deepdata.es_adapter.example.CopyrightTrans;
 import cn.com.deepdata.es_adapter.listener.DefaultIndexResponseListener;
 import cn.com.deepdata.es_adapter.listener.ResponseListener;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 import cn.com.deepdata.es_adapter.task.InboundTask;
 
 /**
- * {@link Pipeline} is an abstract of channel that connects a data source to an 
- * elasticsearch cluster, so that data can be transmitted into or out of the 
- * cluster. Client can use this class to aggregate different components of this 
- * elasticsearch-adapter library and perform operations against elasticsearch 
- * cluster.
+ * {@link Pipeline}是数据源到Elasticsearch集群的抽象，可以使用它集成不同的组件（配置，
+ * 适配器，监听器）以完成向Elasticsearch集群灌入数据的目的。
  * <p/>
- * Note that this class MUST be closed by invoking the method {@link #close()} 
- * when not used any more, or resource leak (like local bound port, data lost) 
- * could occur.
+ * <strong>注意</strong>，因为导入操作是异步的，使用后必须调用{@link #close()}
+ * 同步阻塞并关闭pipeline，否则会产生数据丢失，不能入库.
  * <p/>
  * This class is thread-safe.
  * <p/>
+ * 如何实例化和使用本类，see {@link CopyrightTrans}.
+ * <p/>
  * 
+ * <b>Features not yet supported</b>:<br>
  * TODO bulk mode <br/>
  * TODO outbound mode <br/>
  * TODO log4j <br/>
@@ -46,7 +46,7 @@ public class Pipeline implements Closeable {
 	/**
 	 * This class is {@link Pipeline} settings.
 	 * <p/>
-	 * The instance of this class is immutable and can be used repetitively.
+	 * 不可变类，实例化后可以重复使用.
 	 */
 	public static class PipelineSettings {
 		
@@ -75,8 +75,7 @@ public class Pipeline implements Closeable {
 		/**
 		 * Builder that can build {@link PipelineSettings}.
 		 * <p/>
-		 * Some settings have reasonable default value, so you don't have 
-		 * to set all of them, unless you really need to.
+		 * 大部分参数有合理的默认值.
 		 */
 		public static class SettingsBuilder {
 			
@@ -172,8 +171,7 @@ public class Pipeline implements Closeable {
 		}
 		
 		/**
-		 * Inbound mode means that data are transmitted into Elasticsearch, while
-		 * outbound mode means that data are transmitted out of Elasticsearch.
+		 * inboud模式代表向Elasticsearch集群导入数据，outbound模式反之（当前不支持）.
 		 * <p/>
 		 * Inbound mode by default.
 		 */
@@ -210,7 +208,7 @@ public class Pipeline implements Closeable {
 		
 		/**
 		 * Whether the operation with Elasticsearch is in bulk mode, 
-		 * false by default. 
+		 * false by default. (bulk模式当前不支持).
 		 */
 		private boolean isBulk;
 		
@@ -399,7 +397,7 @@ public class Pipeline implements Closeable {
 				pipeline.getExecutorService().submit(new InboundTask(pipelineCtx));
 			}
 			else {
-				// TODO
+				// TODO outbound mode
 			}
 		}
 		return pipeline;
@@ -442,17 +440,7 @@ public class Pipeline implements Closeable {
 	}
 	
 	/**
-	 * Put data into the managed blocking queue, which then will be transmitted 
-	 * into Elasticsearch cluster. If the queue is full right now, the method will 
-	 * block until there is space available in the queue or the current thread is 
-	 * interrupted, either comes first.
-	 * <p/>
-	 * Call this method when you are in inbound mode.
-	 * <p/>
-	 * Note that there is one and only one unit of data for each thread 
-	 * that probably will still be put into queue right after the pipeline 
-	 * is closed by another thread. For most of the time, you do not have to
-	 * worry about this.
+	 * 向数据队列中放入数据，数据将会被适配并导入到Elasticsearch集群.
 	 * 
 	 * @param data
 	 * @throws InterruptedException
@@ -471,18 +459,7 @@ public class Pipeline implements Closeable {
 	}
 	
 	/**
-	 * Take Elasticsearch-hosted data from the managed blocking queue. If the queue 
-	 * is empty right now, the method will block until there is data available in the 
-	 * queue or the current thread is interrupted, either comes first.
-	 * <p/>
-	 * Call this method when you are in outbound mode.
-	 * <p/>
-	 * Note that there is one and only one unit of data for each thread 
-	 * that probably will still be taken from queue right after the pipeline 
-	 * is closed by another thread. For most of the time, you do not have to
-	 * worry about this.
-	 * <p/>
-	 * TODO poison pill related
+	 * 当前不支持outbound mode，所以不需要调用这个方法.
 	 * 
 	 * @return
 	 * @throws InterruptedException
@@ -501,11 +478,10 @@ public class Pipeline implements Closeable {
 	}
 	
 	/**
-	 * Close the pipeline. After the pipeline is closed, attempts that put data into 
-	 * or retrieve from queue will cause exception. More specifically, you should not 
-	 * invoke the methods {@link cn.com.deepdata.es_adapter.Pipeline#putData(Object) putData(Object)} 
-	 * and {@link cn.com.deepdata.es_adapter.Pipeline#takeData() takeData()} after the pipeline
-	 * is closed, otherwise exception will occur.
+	 * 同步阻塞等待数据队列被清空，并关闭pipeline. 关闭之后，不能再向数据队列中添加数据，否则会抛出
+	 * 异常.
+	 * <p/>
+	 * Also see {@link Pipeline}.
 	 * <p/>
 	 * Also see {@link cn.com.deepdata.es_adapter.common.Closeable#close()}.
 	 */
@@ -544,7 +520,7 @@ public class Pipeline implements Closeable {
 					"If you want to retry in order to tranfer the data still being in the queue, " + 
 					"first try to undo the data that has been transfered, " + 
 					"and then set the configuration parameter 'timeoutAfterClosing' with a proper value (default is 0 second). " + 
-					"For more information about this issue, please refer to this (TODO). ");
+					"For more information about this issue, please refer JavaDoc of QueueDataProvidingAdapter.");
 		}
 	}
 	

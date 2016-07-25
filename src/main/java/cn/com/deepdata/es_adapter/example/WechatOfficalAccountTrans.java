@@ -11,6 +11,12 @@ import cn.com.deepdata.es_adapter.adapter.DataListSplitter;
 import cn.com.deepdata.es_adapter.adapter.InputStream2LinesAdapter;
 import cn.com.deepdata.es_adapter.adapter.SimpleAttrNameAdapter;
 
+/**
+ * Also see {@link CopyrightTrans}.
+ * 
+ * @author sunhe
+ * @date 2016年7月25日
+ */
 public class WechatOfficalAccountTrans {
 	
 	public static void main(String[] args) throws InterruptedException {

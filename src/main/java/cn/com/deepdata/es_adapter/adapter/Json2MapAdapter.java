@@ -5,8 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Adapter that adapts JSON in either String, byte array, or Java Object 
- * format to Java Map.
+ * 适配器，将{@link String}，byte[]和Java对象表示的JSON适配为{@link Map}表示的JSON.
  * <p/>
  * If the given JSON is an array, then the resulting type is List<Object>, 
  * otherwise it's Map<String, Object>.

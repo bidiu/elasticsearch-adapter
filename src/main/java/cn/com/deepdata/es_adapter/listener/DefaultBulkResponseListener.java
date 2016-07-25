@@ -5,6 +5,9 @@ import org.elasticsearch.action.bulk.BulkResponse;
 
 import cn.com.deepdata.es_adapter.ExceptionEvent;
 
+/**
+ * 当前没有被使用.
+ */
 public class DefaultBulkResponseListener implements ResponseListener<BulkResponse> {
 
 	@Override

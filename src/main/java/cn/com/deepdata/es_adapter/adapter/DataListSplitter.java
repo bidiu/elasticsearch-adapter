@@ -5,8 +5,8 @@ import java.util.List;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
- * Adapter that split the incoming data with list type to 
- * individual elements
+ * 适配器，将输入的List&ltT&gt类型的数据，适配为若干个T类型的数据，
+ * 所以之后的适配器应该能够处理T类型的数据.
  * <p/>
  * T is the element's type.
  */

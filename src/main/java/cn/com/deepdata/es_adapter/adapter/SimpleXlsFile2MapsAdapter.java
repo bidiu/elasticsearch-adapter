@@ -17,6 +17,8 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import cn.com.deepdata.es_adapter.SkipAdaptingException;
 
 /**
+ * 适配器，适配Excel文件（目前只支持xls格式）.
+ * <p/>
  * A simple adapter that adapts Microsoft Excel 97/2000/XP/2003 work sheet file (.xls) 
  * to a list of {@link Map}s (every adapted map will be populated to the {@link AdapterChain} 
  * individually, so immediately subsequent adapter of this one should be capable of 
@@ -25,7 +27,7 @@ import cn.com.deepdata.es_adapter.SkipAdaptingException;
  * This adapter is simplified, not very versatile - only supporting 1-layer, 2-dimensional 
  * layout of data. More specifically, the data to adapt should be like a 2-dimensional table, 
  * without inner complicated enclosing structure in it. And you can extend this class to 
- * provide more functionalities or change some default behaviors.
+ * provide more functionalities or change some default behaviors in case of need.
  * <p/>
  * This adapter can accept either {@link File} or {@link FileInputStream} representing the work 
  * sheet file to adapt as an input.
@@ -44,7 +46,7 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList) {
 		this(titleList, 0, Integer.MAX_VALUE, true);
@@ -52,9 +54,9 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param startRowNum
-	 * 		number of row, from which and above to adapt. 
+	 * 		适配每一个sheet是，从那行开始读取（适用于有标题行的情况）,
 	 * 		0-based, inclusive. 
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum) {
@@ -63,12 +65,12 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param startRowNum
-	 * 		number of row, from which and above to adapt. 
+	 * 		适配每一个sheet是，从那行开始读取（适用于有标题行的情况）,
 	 * 		0-based, inclusive. 
 	 * @param shouldTrimStr
-	 * 		whether string value should be trimed
+	 * 		解析字符串类型的单元格时，是否去除前导和后导空白符.
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, boolean shouldTrimStr) {
 		this(titleList, startRowNum, Integer.MAX_VALUE, shouldTrimStr);
@@ -76,15 +78,14 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param startRowNum
-	 * 		number of row, from which and above to adapt. 
+	 * 		适配每一个sheet是，从那行开始读取（适用于有标题行的情况）,
 	 * 		0-based, inclusive. 
 	 * @param endRowNum
-	 * 		number of row, the last row to adapt. 
 	 * 		0-based, exclusive.
 	 * @param shouldTrimStr
-	 * 		whether string value should be trimed
+	 * 		解析字符串类型的单元格时，是否去除前导和后导空白符.
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, int startRowNum, int endRowNum, boolean shouldTrimStr) {
 		this(titleList, null, null, startRowNum, endRowNum, shouldTrimStr);
@@ -92,9 +93,9 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param sheetIndicesToAdapt
-	 * 		index of sheets to adapt
+	 * 		如果Excel文件包含多个sheet，可以指定要适配的sheet序号，0-based
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt) {
 		this(titleList, sheetIndicesToAdapt, 0, true);
@@ -102,14 +103,14 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param sheetIndicesToAdapt
-	 * 		index of sheets to adapt
+	 * 		如果Excel文件包含多个sheet，可以指定要适配的sheet序号，0-based
 	 * @param startRowNum
-	 * 		number of row, from which and above to adapt. 
+	 * 		适配每一个sheet是，从那行开始读取（适用于有标题行的情况）,
 	 * 		0-based, inclusive. 
 	 * @param shouldTrimStr
-	 * 		whether string value should be trimed
+	 * 		解析字符串类型的单元格时，是否去除前导和后导空白符.
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<Integer> sheetIndicesToAdapt, 
 			int startRowNum, boolean shouldTrimStr) {
@@ -118,13 +119,13 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 	
 	/**
 	 * @param titleList
-	 * 		titles applied to each cell of a row
+	 * 		一行中的单元格依次对应的标题名称
 	 * @param sheetNamesToAdapt
-	 * 		name of sheets to adapt
+	 * 		如果Excel文件包含多个sheet，可以指定要适配的sheet的名字
 	 * @param shouldTrimStr
-	 * 		whether string value should be trimed
+	 * 		解析字符串类型的单元格时，是否去除前导和后导空白符.
 	 * @param startRowNum
-	 * 		number of row, from which and above to adapt. 
+	 * 		适配每一个sheet是，从那行开始读取（适用于有标题行的情况）,
 	 * 		0-based, inclusive. 
 	 */
 	public SimpleXlsFile2MapsAdapter(List<String> titleList, List<String> sheetNamesToAdapt, 
@@ -188,6 +189,7 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 		throw new IllegalStateException("cell type not supported");
 	}
 	
+	// 适配行
 	protected void adaptRow(HSSFRow row, AdapterContext ctx) throws InterruptedException {
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
@@ -216,6 +218,7 @@ public class SimpleXlsFile2MapsAdapter extends AbstractAdapter implements QueueD
 		putData(dataMap, ctx.getNextAdapterClazz());
 	}
 	
+	// 适配sheet
 	protected void adaptSheet(HSSFSheet sheet, AdapterContext ctx) throws InterruptedException {
 		for (int r = startRowNum; r < sheet.getLastRowNum() + 1 && r < endRowNum; r++) {
 			HSSFRow row = sheet.getRow(r);

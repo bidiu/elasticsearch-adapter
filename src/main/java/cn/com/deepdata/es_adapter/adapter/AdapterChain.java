@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * The adapter chain composed of several adapters and its meta data.
+ * 适配器链有若干适配器{@link Adapter}和元数据组成.
  * <p/>
  * This class is thread-safe.
  */
@@ -49,7 +49,7 @@ public class AdapterChain {
 	}
 	
 	/**
-	 * Add an adapter to the rear of adapter chain
+	 * 向适配器链尾部添加一个适配器.
 	 * 
 	 * @param adapter
 	 * 		the adapter going to add
@@ -61,8 +61,7 @@ public class AdapterChain {
 	}
 	
 	/**
-	 * Add an adapter to the rear of adapter chain, and with its 
-	 * message.
+	 * 向适配器链尾部添加一个适配器和它的自定义消息.
 	 * 
 	 * @param adapter
 	 * 		the adapter going to add
@@ -109,13 +108,12 @@ public class AdapterChain {
 	}
 	
 	/**
-	 * Fire the first adapter in the chain, all following adapters
-	 * on this chain will be fired sequentially one by one.
+	 * 传入要适配的数据，数据从适配器链的第一个适配器到最后一个依次适配.
 	 * 
 	 * @param dataWrapper
 	 * 		data to be processed
 	 * @return
-	 * 		the resulting data
+	 * 		适配后的数据
 	 * @throws Exception 
 	 */
 	public DataWrapper fireAdapters(DataWrapper dataWrapper) throws Exception {

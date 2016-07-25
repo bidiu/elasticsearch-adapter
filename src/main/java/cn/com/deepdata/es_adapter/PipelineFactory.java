@@ -8,7 +8,7 @@ import cn.com.deepdata.es_adapter.listener.ResponseListener;
 
 /**
  * Sometimes, if you want to build multiple pipelines from 
- * same configurations, then you can use this class.
+ * same configurations, then you can use this class...
  * <p/>
  * This is class is immutable.
  */
@@ -40,6 +40,13 @@ public class PipelineFactory {
 		return responseListener;
 	}
 
+	/**
+	 * 实例化一个新的{@link Pipeline}.
+	 * 
+	 * @return
+	 * @author sunhe
+	 * @date 2016年7月25日
+	 */
 	public Pipeline getInstance() {
 		return Pipeline.build(settings, adapterChainInitializer, responseListener);
 	}

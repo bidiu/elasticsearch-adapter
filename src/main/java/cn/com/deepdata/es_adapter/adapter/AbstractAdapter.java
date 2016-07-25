@@ -7,8 +7,8 @@ import cn.com.deepdata.es_adapter.SkipAdaptingException;
 import cn.com.deepdata.es_adapter.model.DataWrapper;
 
 /**
- * Abstract adapter class for extension. You should only 
- * override the abstract methods of this class.
+ * 适配器的抽象基类，你应该继承之各类，并实现抽象方法，而不是直接实现接口
+ * {@link Adapter}.
  * <p/>
  * And note that extension of this class MUST be thread-safe.
  * <p/>
@@ -19,8 +19,7 @@ public abstract class AbstractAdapter implements Adapter {
 	private BlockingQueue<DataWrapper> dataQueue;
 	
 	/**
-	 * Get the blocking queue that the elasticsearch adapter 
-	 * library uses internally. You can then put data with it.
+	 * 得到内部是用的数据阻塞队列，你可以向其动态地添加数据.
 	 * <p/>
 	 * Note that it's recommended to invoke {@link #putData(Object)} 
 	 * or {@link #putData(Object, Class)}, instead of this one.
@@ -41,10 +40,8 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * Put data into the blocking queue that the elasticsearch adapter 
-	 * library uses internally. The put data will be first adapted by the 
-	 * first adapter in the chain, and then subsequent adapters one by 
-	 * one.
+	 * 向内部使用的阻塞队列添加数据. 被添加的数据将首先被适配器链的第一个适配器适配，
+	 * 然后一个接着一个.
 	 * 
 	 * @param data
 	 * 		data going to be put into the queue
@@ -55,10 +52,8 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
-	 * Put data into the blocking queue that the elasticsearch adapter 
-	 * library uses internally. The put data will be first adapted by the 
-	 * adapter that assigned by the given {@link Class} parameter, and then 
-	 * subsequent adapters one by one.
+	 * 向内部使用的阻塞队列添加数据. 被添加的数据首先会被{@link Class}指定的适配器适配，
+	 * 然后一个接着一个.
 	 * 
 	 * @param data
 	 * 		data going to be put into the queue
@@ -149,22 +144,24 @@ public abstract class AbstractAdapter implements Adapter {
 	}
 	
 	/**
+	 * See {@link ExceptionEvent}.
+	 * 
 	 * @param event
 	 * @return
-	 * 		If the exception handler method can recover from the exception, then 
-	 * 		the method should return the processed data, otherwise just return the provided 
-	 * 		parameter {@link ExceptionEvent}.
+	 * 		如何异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
+	 * 		否则直接返回参数{@link ExceptionEvent}.
 	 */
 	public Object onInboundException(ExceptionEvent event) {
 		return event;
 	}
 	
 	/**
+	 * See {@link ExceptionEvent}.
+	 * 
 	 * @param event
 	 * @return
-	 * 		If the exception handler method can recover from the exception, then 
-	 * 		the method should return the processed data, otherwise just return the provided 
-	 * 		parameter {@link ExceptionEvent}.
+	 * 		如何异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
+	 * 		否则直接返回参数{@link ExceptionEvent}.
 	 */
 	public Object onOutboundException(ExceptionEvent event) {
 		return event;

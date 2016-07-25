@@ -8,11 +8,17 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * A simple adapter that adapts JSON's attribute names.
+ * 适配器，适配JSON的属性名字.
+ * <p/>
+ * 适配之前的属性名和适配之后的属性名由一个{@link Map}指定.
+ * <p/>
+ * 所有匹配到的属性名都会被适配.
  * <p/>
  * The type of input data could be String, byte array, or Java object, while 
  * the type of output data is Map<String, Object>, or List<Object> if the given 
  * JSON is with value of array.
+ * <p/>
+ * Also see {@link Json2MapAdapter}, this class is a subclass of it.
  */
 public class SimpleAttrNameAdapter extends Json2MapAdapter {
 	
