@@ -40,7 +40,7 @@ public class PipelineFactory {
 		return responseListener;
 	}
 
-	public Pipeline build() {
+	public Pipeline getInstance() {
 		return Pipeline.build(settings, adapterChainInitializer, responseListener);
 	}
 	
