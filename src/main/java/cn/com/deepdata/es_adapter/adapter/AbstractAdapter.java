@@ -148,7 +148,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * 
 	 * @param event
 	 * @return
-	 * 		如何异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
+	 * 		如果异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
 	 * 		否则直接返回参数{@link ExceptionEvent}.
 	 */
 	public Object onInboundException(ExceptionEvent event) {
@@ -160,7 +160,7 @@ public abstract class AbstractAdapter implements Adapter {
 	 * 
 	 * @param event
 	 * @return
-	 * 		如何异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
+	 * 		如果异常处理器（即本方法）可以从异常中恢复，则返回适配后的数据，
 	 * 		否则直接返回参数{@link ExceptionEvent}.
 	 */
 	public Object onOutboundException(ExceptionEvent event) {
