@@ -23,10 +23,13 @@ public class DirectoryAdaptUtil {
 
 	protected PipelineFactory pipelineFactory;
 	
+	protected String suffix;
+	
 	protected List<File> xlsFileList = new ArrayList<File>();
 	
-	public DirectoryAdaptUtil(PipelineFactory pipelineFactory, String rootDir) {
+	public DirectoryAdaptUtil(PipelineFactory pipelineFactory, String rootDir, String suffix) {
 		this.pipelineFactory = pipelineFactory;
+		this.suffix = suffix;
 		findXlsFiles(new File(rootDir));
 	}
 	
@@ -34,7 +37,7 @@ public class DirectoryAdaptUtil {
 		File[] xlsFiles = dir.listFiles(new FilenameFilter() {
 			
 			public boolean accept(File dir, String name) {
-				if (name.endsWith(".xls")) {
+				if (name.endsWith("suffix")) {
 					return true;
 				}
 				else {
